@@ -101,3 +101,26 @@ func TestKeys(t *testing.T) {
 		}
 	})
 }
+
+func TestLen(t *testing.T) {
+
+	if ok := l.Len() == len(*l); ok != true {
+		t.Fatalf("lexicon.Len() returned an incorrect length")
+	}
+}
+
+func TestMap(t *testing.T) {
+
+	l.Map(func(key string, value interface{}) interface{} {
+
+		value = 0
+
+		return value
+	})
+
+	l.Each(func(_ string, value interface{}) {
+		if ok := value.(int) == 0; ok != true {
+			t.Fatalf("lexicon.Map(f (key string, value interface{}) interface{}) did not mutate the lexicon")
+		}
+	})
+}
