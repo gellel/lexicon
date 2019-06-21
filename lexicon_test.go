@@ -68,6 +68,23 @@ func TestEach(t *testing.T) {
 	})
 }
 
+func TestEmpty(t *testing.T) {
+
+	if ok := (&lexicon.Lexicon{}).Empty(); ok != true {
+		t.Fatalf("lexicon.Empty() did not return true for an empty lexicon")
+	}
+}
+
+func TestFetch(t *testing.T) {
+
+	if ok := l.Fetch("a") != nil; ok != true {
+		t.Fatalf("lexicon.Fetch(key string) did not return an interface for a known key")
+	}
+	if ok := l.Fetch("NIL") == nil; ok != true {
+		t.Fatalf("lexicon.Fetch(key string) did not return nil for a missing key")
+	}
+}
+
 func TestGet(t *testing.T) {
 
 	value, ok := l.Get("a")
