@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gellel/lexicon"
+	"github.com/gellel/slice"
 )
 
 var (
@@ -43,4 +44,60 @@ func TestAdd(t *testing.T) {
 	if _, ok := (*l)["e"]; ok != true {
 		t.Fatalf("lexicon.Add(key string, value interface{}) did not add new key of \"e\"")
 	}
+}
+
+func TestDel(t *testing.T) {
+
+	if ok := l.Del("e"); ok != true {
+		t.Fatalf("lexicon.Del(key string) did not return true")
+	}
+	if ok := l.Del("e"); ok != false {
+		t.Fatalf("lexicon.Del(key string) did not return false")
+	}
+}
+
+func TestEach(t *testing.T) {
+
+	l.Each(func(key string, value interface{}) {
+		if _, ok := (*l)[key]; ok != true {
+			t.Fatalf("lexicon.Each(f func(key string, value interface{})) did not return an accurate key")
+		}
+		if v, _ := (*l)[key]; v != value {
+			t.Fatalf("lexicon.Each(f func(key string, value interface{})) did not return the same interface at accessed key position")
+		}
+	})
+}
+
+func TestGet(t *testing.T) {
+
+	value, ok := l.Get("a")
+	if ok != true {
+		t.Fatalf("lexicon.Get(key string, value interface{}) did not return true for a known key")
+	}
+	if value.(int) != 1 {
+		t.Fatalf("lexicon.Get(key string, value interface{}) did not return an interface")
+	}
+}
+
+func TestHas(t *testing.T) {
+
+	if ok := l.Has("b"); ok != true {
+		t.Fatalf("lexicon.Has(key string) did not return true for a known key")
+	}
+}
+
+func TestKeys(t *testing.T) {
+
+	s := l.Keys()
+
+	if ok := reflect.TypeOf(s).Kind() == reflect.TypeOf(slice.NewString()).Kind(); ok != true {
+		t.Fatalf("lexicon.Keys() did not return a slice.String pointer")
+	}
+
+	s.Each(func(i int, key string) {
+
+		if ok := l.Has(key); ok != true {
+			t.Fatalf("lexicon.Keys() did not return a collection of valid lexicon key references")
+		}
+	})
 }
