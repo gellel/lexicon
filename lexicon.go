@@ -15,7 +15,7 @@ type lexicon interface {
 	Keys() *slice.String
 	Len() int
 	Map(f func(key string, value interface{}) interface{}) *Lexicon
-	Merge(lexicon *Lexicon)
+	Merge(lexicon *Lexicon) *Lexicon
 	Values() *slice.Slice
 }
 
@@ -47,4 +47,38 @@ func (pointer *Lexicon) Get(key string) (interface{}, bool) {
 func (pointer *Lexicon) Has(key string) bool {
 	_, ok := pointer.Get(key)
 	return ok
+}
+
+func (pointer *Lexicon) Keys() *slice.String {
+	s := slice.NewString()
+	for key := range *pointer {
+		s.Append(key)
+	}
+	return s
+}
+
+func (pointer *Lexicon) Len() int {
+	return len(*pointer)
+}
+
+func (pointer *Lexicon) Map(f func(key string, value interface{}) interface{}) *Lexicon {
+	for key, value := range *pointer {
+		pointer.Add(key, f(key, value))
+	}
+	return pointer
+}
+
+func (pointer *Lexicon) Merge(lexicon *Lexicon) *Lexicon {
+	lexicon.Each(func(key string, value interface{}) {
+		pointer.Add(key, value)
+	})
+	return pointer
+}
+
+func (pointer *Lexicon) Values() *slice.Slice {
+	s := &slice.Slice{}
+	for _, value := range *pointer {
+		s.Append(value)
+	}
+	return s
 }
