@@ -124,3 +124,28 @@ func TestMap(t *testing.T) {
 		}
 	})
 }
+
+func TestMerge(t *testing.T) {
+
+	l = &lexicon.Lexicon{}
+
+	previousLength := l.Len()
+
+	x := &lexicon.Lexicon{
+		"1": 1,
+		"2": 2}
+
+	l.Merge(x)
+
+	if ok := l.Len() != previousLength; ok != true {
+		t.Fatalf("lexicon.Merge(lexicon *Lexicon) did not modify the length of the receiver lexicon")
+	}
+	if ok := l.Len() == x.Len(); ok != true {
+		t.Fatalf("lexicon.Merge(lexicon *Lexicon) did not assign same number of values to receiver lexicon")
+	}
+	l.Each(func(key string, _ interface{}) {
+		if ok := x.Has(key); ok != true {
+			t.Fatalf("lexicon.Merge(lexicon *Lexicon) receiver lexicon does not have corresponding key to argument lexicon")
+		}
+	})
+}
