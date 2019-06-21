@@ -166,3 +166,24 @@ func TestMerge(t *testing.T) {
 		}
 	})
 }
+
+func TestMesh(t *testing.T) {
+
+	l = &lexicon.Lexicon{}
+
+	a := map[string]interface{}{"a": 1}
+	b := map[string]interface{}{"b": 2}
+
+	l.Mesh(a, b)
+
+	for _, x := range []map[string]interface{}{a, b} {
+		for k, v := range x {
+			if ok := l.Has(k); ok != true {
+				t.Fatalf("lexicon.Mesh(m ...map[string]interface{}) did not add key " + k + " to receiver Lexicon")
+			}
+			if ok := l.Fetch(k) == v; ok != true {
+				t.Fatalf("lexicon.Mesh(m ...map[string]interface{}) did not add value " + string(v.(int)) + " to receiver Lexicon")
+			}
+		}
+	}
+}
