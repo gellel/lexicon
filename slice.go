@@ -25,6 +25,10 @@ func NewSlice() *Slice {
 		lexicon: New()}
 }
 
+func NewSliceLexicon(m ...map[string]*slice.Slice) *Slice {
+	return NewSlice().Mesh(m...)
+}
+
 type Slice struct {
 	lexicon *Lexicon
 }
