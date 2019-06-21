@@ -37,6 +37,7 @@ type lexicon interface {
 	Len() int
 	Map(f func(key string, value interface{}) interface{}) *Lexicon
 	Merge(lexicon *Lexicon) *Lexicon
+	Mesh(m ...map[string]interface{}) *Lexicon
 	Values() *slice.Slice
 }
 
@@ -117,6 +118,16 @@ func (pointer *Lexicon) Merge(lexicon *Lexicon) *Lexicon {
 	lexicon.Each(func(key string, value interface{}) {
 		pointer.Add(key, value)
 	})
+	return pointer
+}
+
+// Mesh merges a collection maps to the Lexicon.
+func (pointer *Lexicon) Mesh(m ...map[string]interface{}) *Lexicon {
+	for _, m := range m {
+		for k, v := range m {
+			pointer.Add(k, v)
+		}
+	}
 	return pointer
 }
 
