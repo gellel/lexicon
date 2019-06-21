@@ -1,10 +1,26 @@
 package lexicon
 
-import "github.com/gellel/slice"
+import (
+	"github.com/gellel/slice"
+)
 
 var (
 	_ lexicon = (*Lexicon)(nil)
 )
+
+func New() *Lexicon {
+	return &Lexicon{}
+}
+
+func NewLexicon(m ...map[string]interface{}) *Lexicon {
+	lexicon := Lexicon{}
+	for _, m := range m {
+		for k, v := range m {
+			lexicon[k] = v
+		}
+	}
+	return &lexicon
+}
 
 type lexicon interface {
 	Add(key string, value interface{}) *Lexicon
