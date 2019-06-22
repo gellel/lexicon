@@ -60,7 +60,7 @@ func (pointer *Types) Add(key string, t T) {
 }
 ```
 
-Using a built-in string slice
+Using a built-in string lexicon
 
 ```go
 package main
