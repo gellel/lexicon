@@ -18,15 +18,12 @@ type s interface {
 	Len() int
 	Map(f func(key string, slice *slice.Slice) *slice.Slice) *Slice
 	Mesh(m ...map[string]*slice.Slice) *Slice
+	Values() *slice.Slices
 }
 
-func NewSlice() *Slice {
-	return &Slice{
-		lexicon: New()}
-}
-
-func NewSliceLexicon(m ...map[string]*slice.Slice) *Slice {
-	return NewSlice().Mesh(m...)
+func NewSlice(m ...map[string]*slice.Slice) *Slice {
+	return (&Slice{
+		lexicon: New()}).Mesh(m...)
 }
 
 type Slice struct {
@@ -92,4 +89,12 @@ func (pointer *Slice) Mesh(slice ...map[string]*slice.Slice) *Slice {
 		}
 	}
 	return pointer
+}
+
+func (pointer *Slice) Values() *slice.Slices {
+	slices := slice.NewSlices()
+	pointer.Each(func(_ string, s *slice.Slice) {
+		slices.Append(s)
+	})
+	return slices
 }
