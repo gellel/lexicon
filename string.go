@@ -15,7 +15,22 @@ func NewString(m ...map[string]string) *String {
 		lexicon: New()}).Mesh(m...)
 }
 
-type str interface{}
+type str interface {
+	Add(key, value string) *String
+	Del(key string) bool
+	Each(f func(key, value string)) *String
+	Empty() bool
+	Fetch(key string) string
+	Get(key string) (string, bool)
+	Has(key string) bool
+	Keys() *slice.String
+	Len() int
+	Map(f func(key, value string) string) *String
+	Merge(s *String) *String
+	Mesh(m ...map[string]string) *String
+	String() string
+	Values() *slice.String
+}
 
 type String struct {
 	lexicon *Lexicon
