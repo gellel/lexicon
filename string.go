@@ -6,6 +6,15 @@ import (
 	"github.com/gellel/slice"
 )
 
+var (
+	_ str = (*String)(nil)
+)
+
+func NewString(m ...map[string]string) *String {
+	return (&String{
+		lexicon: New()}).Mesh(m...)
+}
+
 type str interface{}
 
 type String struct {
