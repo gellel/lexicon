@@ -10,7 +10,7 @@ var (
 	_ str = (*String)(nil)
 )
 
-// NewString instantiates a empty or populated Lexicon pointer. Takes an argument of 0-N maps of strings.
+// NewString instantiates a empty or populated String Lexicon pointer. Takes an argument of 0-N maps of strings.
 func NewString(m ...map[string]string) *String {
 	return (&String{
 		lexicon: New()}).Mesh(m...)
@@ -57,7 +57,7 @@ func (pointer *String) Each(f func(key, value string)) *String {
 	return pointer
 }
 
-// Empty returns a boolean indicating whether the Lexicon contains zero values.
+// Empty returns a boolean indicating whether the String Lexicon contains zero values.
 func (pointer *String) Empty() bool {
 	return pointer.lexicon.Empty()
 }
