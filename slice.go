@@ -1,10 +1,20 @@
 package lexicon
 
-import "github.com/gellel/slice"
+import (
+	"fmt"
+
+	"github.com/gellel/slice"
+)
 
 var (
 	_ s = (*Slice)(nil)
 )
+
+// NewSlice instantiates a empty or populated Lexicon pointer. Takes an argument of 0-N maps of slice.Slice.
+func NewSlice(m ...map[string]*slice.Slice) *Slice {
+	return (&Slice{
+		lexicon: New()}).Mesh(m...)
+}
 
 type s interface {
 	Add(key string, slice *slice.Slice) *Slice
@@ -19,13 +29,8 @@ type s interface {
 	Map(f func(key string, slice *slice.Slice) *slice.Slice) *Slice
 	Merge(slice ...*Slice) *Slice
 	Mesh(m ...map[string]*slice.Slice) *Slice
+	String() string
 	Values() *slice.Slices
-}
-
-// NewSlice instantiates a empty or populated Lexicon pointer. Takes an argument of 0-N maps of slice.Slice.
-func NewSlice(m ...map[string]*slice.Slice) *Slice {
-	return (&Slice{
-		lexicon: New()}).Mesh(m...)
 }
 
 // Slice is a map-like object whose methods are used to perform traversal and mutation operations by key-value pair for slice.Slice pointers.
@@ -113,6 +118,10 @@ func (pointer *Slice) Mesh(slice ...map[string]*slice.Slice) *Slice {
 		}
 	}
 	return pointer
+}
+
+func (pointer *Slice) String() string {
+	return fmt.Sprintf("%v", pointer.lexicon)
 }
 
 // Values method returns a slice.Slice pointer of the Slice Lexicon's own enumerable property values, in the same order as that provided by a for...in loop.
