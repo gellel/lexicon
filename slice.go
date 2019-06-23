@@ -10,7 +10,7 @@ var (
 	_ s = (*Slice)(nil)
 )
 
-// NewSlice instantiates a empty or populated Lexicon pointer. Takes an argument of 0-N maps of slice.Slice.
+// NewSlice instantiates a empty or populated Slice Lexicon pointer. Takes an argument of 0-N maps of slice.Slice.
 func NewSlice(m ...map[string]*slice.Slice) *Slice {
 	return (&Slice{
 		lexicon: New()}).Mesh(m...)
