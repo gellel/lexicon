@@ -2,6 +2,8 @@
 package lexicon
 
 import (
+	"fmt"
+
 	"github.com/gellel/slice"
 )
 
@@ -38,6 +40,7 @@ type lexicon interface {
 	Map(f func(key string, value interface{}) interface{}) *Lexicon
 	Merge(lexicon *Lexicon) *Lexicon
 	Mesh(m ...map[string]interface{}) *Lexicon
+	Peek(key string) string
 	Values() *slice.Slice
 }
 
@@ -129,6 +132,11 @@ func (pointer *Lexicon) Mesh(m ...map[string]interface{}) *Lexicon {
 		}
 	}
 	return pointer
+}
+
+// Peek returns the string value of the element assigned to the argument key.
+func (pointer *Lexicon) Peek(key string) string {
+	return fmt.Sprintf("%v", pointer.Fetch(key))
 }
 
 // Values method returns a slice.Slice pointer of the Lexicon's own enumerable property values, in the same order as that provided by a for...in loop.
