@@ -71,9 +71,9 @@ import (
 
 func main() {
 
-   lexicon := lexicon.Slice()
+   lexicon := lexicon.String()
 
-   lexicon.Add("a", slice.New())
+   lexicon.Add("a", "hello").Fetch("a")
 }
 ```
 
