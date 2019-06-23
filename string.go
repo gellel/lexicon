@@ -26,7 +26,7 @@ type str interface {
 	Keys() *slice.String
 	Len() int
 	Map(f func(key, value string) string) *String
-	Merge(s *String) *String
+	Merge(s ...*String) *String
 	Mesh(m ...map[string]string) *String
 	String() string
 	Values() *slice.String
@@ -88,8 +88,10 @@ func (pointer *String) Map(f func(key, value string) string) *String {
 	return pointer
 }
 
-func (pointer *String) Merge(s *String) *String {
-	pointer.lexicon.Merge(s.lexicon)
+func (pointer *String) Merge(s ...*String) *String {
+	for _, s := range s {
+		pointer.lexicon.Merge(s.lexicon)
+	}
 	return pointer
 }
 
