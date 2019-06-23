@@ -38,7 +38,7 @@ type lexicon interface {
 	Keys() *slice.String
 	Len() int
 	Map(f func(key string, value interface{}) interface{}) *Lexicon
-	Merge(lexicon *Lexicon) *Lexicon
+	Merge(lexicon ...*Lexicon) *Lexicon
 	Mesh(m ...map[string]interface{}) *Lexicon
 	Peek(key string) string
 	Values() *slice.Slice
@@ -116,11 +116,13 @@ func (pointer *Lexicon) Map(f func(key string, value interface{}) interface{}) *
 	return pointer
 }
 
-// Merge merges two Lexicons.
-func (pointer *Lexicon) Merge(lexicon *Lexicon) *Lexicon {
-	lexicon.Each(func(key string, value interface{}) {
-		pointer.Add(key, value)
-	})
+// Merge merges N number of Lexicons.
+func (pointer *Lexicon) Merge(lexicon ...*Lexicon) *Lexicon {
+	for _, lexicon := range lexicon {
+		lexicon.Each(func(key string, value interface{}) {
+			pointer.Add(key, value)
+		})
+	}
 	return pointer
 }
 
