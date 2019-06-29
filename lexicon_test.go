@@ -103,6 +103,13 @@ func TestHas(t *testing.T) {
 	}
 }
 
+func TestIntersection(t *testing.T) {
+
+	if ok := l.Intersection(l).Len() == l.Len(); ok != true {
+		t.Fatalf("lexicon.Intersection(lexicon *Lexicon) did not return a Lexicon composed of all shared keys")
+	}
+}
+
 func TestKeys(t *testing.T) {
 
 	s := l.Keys()

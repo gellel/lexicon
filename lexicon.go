@@ -35,6 +35,7 @@ type lexicon interface {
 	Fetch(key string) interface{}
 	Get(key string) (interface{}, bool)
 	Has(key string) bool
+	Intersection(lexicon *Lexicon) *Lexicon
 	Keys() *slice.String
 	Len() int
 	Map(f func(key string, value interface{}) interface{}) *Lexicon
@@ -92,6 +93,22 @@ func (pointer *Lexicon) Get(key string) (interface{}, bool) {
 func (pointer *Lexicon) Has(key string) bool {
 	_, ok := pointer.Get(key)
 	return ok
+}
+
+// Intersection method returns a new Lexicon containing the shared keys between two Lexicons.
+func (pointer *Lexicon) Intersection(lexicon *Lexicon) *Lexicon {
+	m := &Lexicon{}
+	pointer.Each(func(key string, _ interface{}) {
+		if ok := lexicon.Has(key); ok {
+			m.Add(key, true)
+		}
+	})
+	lexicon.Each(func(key string, _ interface{}) {
+		if ok := pointer.Has(key); ok {
+			m.Add(key, 1)
+		}
+	})
+	return m
 }
 
 // Keys method returns a slice.String of the Lexicon's own property names, in the same order as we get with a normal loop.
