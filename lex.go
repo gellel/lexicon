@@ -1,10 +1,12 @@
-package lexicon
+package lex
 
 var _ lexer = (&Lex{})
 
 type lexer interface {
 	Add(interface{}, interface{}) *Lex
+	AddOK(interface{}, interface{}) bool
 	Del(interface{}) *Lex
+	DelOK(interface{}) bool
 	Each(func(interface{}, interface{})) *Lex
 	EachBreak(func(interface{}, interface{}) bool) *Lex
 	EachKey(func(interface{})) *Lex
