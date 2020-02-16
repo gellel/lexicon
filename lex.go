@@ -6,12 +6,15 @@ type lexer interface {
 	Add(interface{}, interface{}) *Lex
 	AddOK(interface{}, interface{}) bool
 	Del(interface{}) *Lex
+	DelAll() *Lex
+	DelSome(...interface{}) *Lex
 	DelOK(interface{}) bool
 	Each(func(interface{}, interface{})) *Lex
 	EachBreak(func(interface{}, interface{}) bool) *Lex
 	EachKey(func(interface{})) *Lex
 	EachValue(func(interface{})) *Lex
 	Fetch(interface{}) interface{}
+	FetchSome(...interface{}) []interface{}
 	Get(interface{}) (interface{}, bool)
 	Has(interface{}) bool
 	Keys() []interface{}
@@ -51,6 +54,20 @@ func (lex *Lex) AddOK(k interface{}, v interface{}) bool {
 func (lex *Lex) Del(k interface{}) *Lex {
 	delete(*lex, k)
 	return lex
+}
+
+// DelAll deletes all keys and elements from the map and returns the modified map.
+func (lex *Lex) DelAll() *Lex {
+	(*lex) = (&Lex{})
+	return lex
+}
+
+// DelSome deletes some keys and elements from the map and returns the modified map. Arguments are treated as keys to the map.
+func (lex *Lex) DelSome(k ...interface{}) *Lex {
+	for _, k := range k {
+		lex.Del(k)
+	}
+	return k
 }
 
 // DelOK deletes the key and element from the map and returns a boolean on the status of the transaction.
@@ -104,6 +121,23 @@ func (lex *Lex) EachValue(fn func(v interface{})) *Lex {
 func (lex *Lex) Fetch(k interface{}) interface{} {
 	var v, _ = lex.Get(k)
 	return v
+}
+
+// FetchSome retrieves a collection of elements from the map by key.
+// Missing entries are not included in the returned collection.
+func (lex *Lex) FetchSome(k ...interface{}) []interface{} {
+	var (
+		s = []interface{}{}
+	)
+	for _, k := range k {
+		var (
+			v = lex.Fetch(k)
+		)
+		if v != nil {
+			s = append(s, v)
+		}
+	}
+	return s
 }
 
 // Get gets the element from the map at the key address.
