@@ -1,36 +1,34 @@
-[![Build Status](https://travis-ci.org/gellel/lex.svg?branch=master)](https://travis-ci.org/gellel/map)
-[![Apache V2 License](https://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/gellel/map/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/gellel/lex.svg?branch=master)](https://travis-ci.org/gellel/lex)
+[![Apache V2 License](https://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/gellel/lex/blob/master/LICENSE)
 
 # Lex
 
 Package lex is a package of map interfaces to handle common map-like operations.
 
 Lex contains a single Lex struct that exposes methods to perform traversal and mutation operations
-for a collection of Go interfaces. The Lex struct can be extended to handle
-the acceptance and selection of interface specific types. To extend the Lex an interface
-can be defined that calls the exposed Lex methods.
+for a map of Go interfaces. The Lex struct can be extended to handle storing and retrieving
+of discrete Go types.
 
-Package map comes with all Go primative types as interfaces out of the box.
+Package map comes with all Go primative types as interfaces out of the box. Each type is named by
+its Golang namespace and contains the _er_ pattern in its name. For example, a map of strings is
+named `lex.Stringer`.
 
-Each map interface comes with a constructor function that takes zero to n arguments of the
-map interface type.
-
-The map interfaces to not expose the underlying interface map to prevent a dirty reference.
+The map interfaces do not expose the underlying map to prevent a dirty reference.
 This pattern should be adopted when wrapping the Lex struct.
 
 The package is built around the Go API reference documentation. Please consider using `godoc`
 to build custom integrations. If you are using Go 1.12 or earlier, godoc should be included. All
-Go 1.13 users will need to grab this package using the `go get` flow.
+Go 1.13 users can grab this package using the `go get` flow.
 
 ## Installing
 
 Use `go get` to retrieve the SDK to add it to your `GOPATH` workspace, or project's Go module dependencies.
 
-```go get github.com/gellel/map```
+```go get github.com/gellel/lex```
 
 To update the SDK use `go get -u` to retrieve the latest version of the SDK.
 
-```go get -u github.com/gellel/map```
+```go get -u github.com/gellel/lex```
 
 ## Dependencies
 
@@ -40,7 +38,7 @@ The SDK includes a vendor folder containing the runtime dependencies of the SDK.
 
 If you are using Go modules, your go get will default to the latest tagged release version of the SDK. To get a specific release version of the SDK use `@<tag>` in your `go get` command.
 
-```go get github.com/gelle/map@<version>```
+```go get github.com/gelle/lex@<version>```
 
 To get the latest SDK repository change use @latest.
 
@@ -58,7 +56,7 @@ package main
 import (
     "fmt"
 
-    "github.com/gellel/map"
+    "github.com/gellel/lex"
 )
 
 var (
@@ -82,13 +80,7 @@ var (
     v    lex.Interfacer   // map[interface{}]interface{}
 )
 
-func main() {
-    var (
-        s = lex.NewStringer("a", "b", "c", "go!")
-    )
-    s.Bounds(0)          // true
-    fmt.Println(s.Pop()) // "go!"
-}
+func main() {}
 ```
 
 Each interface is intended to handle a unique Go lang primative type.
@@ -101,15 +93,7 @@ import (
     "github.com/gellel/lex"
 )
 
-func main() {
-
-    var (
-        numbers = lex.NewInter(6, 1, 2, 3)
-    )
-    numbers.Sort().Each(func(i int, n int) {
-        fmt.Println(i, n) // (0, 1), (1, 2), (2, 3), (3, 6)
-    })
-}
+func main() {}
 ```
 
 ## Extending
@@ -122,7 +106,7 @@ This is the pattern implemented by this package and is used for the provided int
 package food 
 
 import (
-    "github.com/gellel/map"
+    "github.com/gellel/lex"
 )
 
 // Food is a struct that describes food.
