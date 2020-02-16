@@ -17,6 +17,7 @@ type lexer interface {
 	Keys() []interface{}
 	Len() int
 	Map(func(interface{}, interface{}) interface{}) *Lex
+	Not(interface{}) bool
 	Values() []interface{}
 }
 
@@ -33,11 +34,27 @@ func (lex *Lex) Add(k interface{}, v interface{}) *Lex {
 	return lex
 }
 
+// AddOK adds a key and element to the map and returns a boolean on the status of the transaction.
+// AddOK returns false if a key already exists.
+func (lex *Lex) AddOK(k interface{}, v interface{}) bool {
+	var (
+		ok bool
+	)
+	if lex.Not() {
+		lex.Add(k, v)
+		ok = true
+	}
+	return ok
+}
+
 // Del deletes the key and element from the map and returns the modified map.
 func (lex *Lex) Del(k interface{}) *Lex {
 	delete(*lex, k)
 	return lex
 }
+
+// DelOK deletes the key and element from the map and returns a boolean on the status of the transaction.
+func (lex *Lex) DelOK(k interface{}) bool { return lex.Del(k).Has(k) }
 
 // Each executes a provided function once for each map element.
 func (lex *Lex) Each(fn func(k interface{}, v interface{})) *Lex {
@@ -124,6 +141,9 @@ func (lex *Lex) Map(fn func(k interface{}, v interface{}) interface{}) *Lex {
 	})
 	return lex
 }
+
+// Not checks that the map does not have a key in the map.
+func (lex *Lex) Not(k interface{}) bool { return (lex.Has(k) == false) }
 
 // Values returns a slice of the map values in order found.
 func (lex *Lex) Values() []interface{} {
