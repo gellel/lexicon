@@ -43,7 +43,7 @@ func (lex *Lex) AddOK(k interface{}, v interface{}) bool {
 	var (
 		ok bool
 	)
-	if lex.Not() {
+	if lex.Not(k) {
 		lex.Add(k, v)
 		ok = true
 	}
@@ -52,13 +52,13 @@ func (lex *Lex) AddOK(k interface{}, v interface{}) bool {
 
 // Del deletes the key and element from the map and returns the modified map.
 func (lex *Lex) Del(k interface{}) *Lex {
-	delete(*lex, k)
+	delete((*lex), k)
 	return lex
 }
 
 // DelAll deletes all keys and elements from the map and returns the modified map.
 func (lex *Lex) DelAll() *Lex {
-	(*lex) = (&Lex{})
+	(lex) = (&Lex{})
 	return lex
 }
 
@@ -67,7 +67,7 @@ func (lex *Lex) DelSome(k ...interface{}) *Lex {
 	for _, k := range k {
 		lex.Del(k)
 	}
-	return k
+	return lex
 }
 
 // DelOK deletes the key and element from the map and returns a boolean on the status of the transaction.
