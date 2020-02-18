@@ -78,10 +78,30 @@ func TestDelAll(t *testing.T) {
 	nextLength = len(l)
 	ok = nextLength != length
 	if !ok {
-		t.Fatalf("len(&lex.Lex.DelSome()) != 0")
+		t.Fatalf("len(&lex.Lex.DelAll()) != 0")
 	}
 	ok = nextLength == 0
 	if !ok {
-		t.Fatalf("len(&lex.Lex.DelSome()) != 0")
+		t.Fatalf("len(&lex.Lex.DelAll()) != 0")
+	}
+}
+
+func TestDelSome(t *testing.T) {
+	var (
+		size = (rand.Intn(10-5+1) + 5)
+	)
+	var (
+		k      = make([]interface{}, size)
+		length = len(l)
+		ok     bool
+	)
+	for i := range k {
+		k[i] = i
+		l.Add(i, i)
+	}
+	l.DelSome(k...)
+	ok = len(l) == length
+	if !ok {
+		t.Fatalf("len(&lex.Lex.DelSome()) != n")
 	}
 }

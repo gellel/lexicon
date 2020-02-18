@@ -58,7 +58,7 @@ func (lex *Lex) Del(k interface{}) *Lex {
 
 // DelAll deletes all keys and elements from the map and returns the modified map.
 func (lex *Lex) DelAll() *Lex {
-	(lex) = (&Lex{})
+	(*lex) = (Lex{})
 	return lex
 }
 
