@@ -105,3 +105,15 @@ func TestDelSome(t *testing.T) {
 		t.Fatalf("len(&lex.Lex.DelSome()) != n")
 	}
 }
+
+func TestDelOK(t *testing.T) {
+	var (
+		k  = rand.Intn(10)
+		ok bool
+	)
+	l.Add(k, k)
+	ok = l.DelOK(k)
+	if !ok {
+		t.Fatalf("(&lex.Lex.DelOK(interface{}) (bool)) != true")
+	}
+}
