@@ -1,6 +1,7 @@
 package lex_test
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -227,5 +228,17 @@ func TestLen(t *testing.T) {
 	var ok = len(l) == l.Len()
 	if !ok {
 		t.Fatalf("len(&lex.Lex.Len() int) != n")
+	}
+}
+
+func TestMap(t *testing.T) {
+	l.Map(func(_, v interface{}) interface{} {
+		return fmt.Sprintf("%v", v)
+	})
+	for _, v := range l {
+		switch v.(type) {
+		case int:
+			t.Fatalf("len(&lex.Lex.Map(func(interface{}, interface{}) interface{})) != string")
+		}
 	}
 }
