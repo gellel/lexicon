@@ -159,7 +159,7 @@ func TestGet(t *testing.T) {
 	var (
 		k = (rand.Intn(10-5+1) + 5)
 	)
-	l.Add(k, v)
+	l.Add(k, k)
 	var v, ok = l.Get(k)
 	if !ok {
 		t.Fatalf("(&lex.Lex.Get(interface{}) (_, bool)) != true")
