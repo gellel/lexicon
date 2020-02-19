@@ -117,3 +117,78 @@ func TestDelOK(t *testing.T) {
 		t.Fatalf("(&lex.Lex.DelOK(interface{}) (bool)) != true")
 	}
 }
+
+func TestEach(t *testing.T) {
+	var (
+		size = (rand.Intn(10-5+1) + 5)
+	)
+	var (
+		k = make([]interface{}, size)
+	)
+	for i := 0; i < size; i++ {
+		k = append(k, i)
+	}
+	l.Each(func(x, v interface{}) {
+		var ok = k[x.(int)] == v
+		if !ok {
+			t.Fatalf("(&lex.Lex.Each(func(interface{}, interface{}))) != interface{}, interface{}")
+		}
+	})
+}
+
+func TestEachSome(t *testing.T) {
+	var (
+		size = (rand.Intn(10-5+1) + 5)
+	)
+	var (
+		k = make([]interface{}, size)
+	)
+	for i := 0; i < size; i++ {
+		k[i] = i
+		l.Add(i, i)
+	}
+	var (
+		v = l.FetchSome(k...)
+	)
+	var ok = len(v) == len(k)
+	if !ok {
+		t.Fatalf("len(&lex.Lex.EachSome(interface{}...) []interface{}) != n")
+	}
+}
+
+func TestGet(t *testing.T) {
+	var (
+		k = (rand.Intn(10-5+1) + 5)
+	)
+	l.Add(k, k)
+	var v, ok = l.Get(k)
+	if !ok {
+		t.Fatalf("(&lex.Lex.Get(interface{}) (_, bool)) != true")
+	}
+	ok = v == k
+	if !ok {
+		t.Fatalf("(&lex.Lex.Add(interface{}, interface{}) (interface{},)) != interface{}")
+	}
+}
+
+func TestGetLength(t *testing.T) {
+	var (
+		size = len(l)
+	)
+	var (
+		k = (rand.Intn(size*2-size+1) + size)
+	)
+	l.Add(k, k)
+	var v, n, ok = l.GetLength(k)
+	if !ok {
+		t.Fatalf("(&lex.Lex.GetLength(interface{}) (_, _, bool)) != true")
+	}
+	ok = (n == (size + 1))
+	if !ok {
+		t.Fatalf("(&lex.Lex.Get(interface{}) (_, int, _)) != n + 1")
+	}
+	ok = v == k
+	if !ok {
+		t.Fatalf("(&lex.Lex.Get(interface{}) (interface{}, _, _)) != interface{}")
+	}
+}
