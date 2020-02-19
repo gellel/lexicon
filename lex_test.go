@@ -206,3 +206,26 @@ func TestHas(t *testing.T) {
 		t.Fatalf("(&lex.Lex.Has(interface{}) (bool)) != true")
 	}
 }
+
+func TestKeys(t *testing.T) {
+	var (
+		a = []interface{}{}
+		k interface{}
+		v = []interface{}{}
+	)
+	for k = range l {
+		v = append(v, k)
+	}
+	a = l.Keys()
+	var ok = len(a) == len(v)
+	if !ok {
+		t.Fatalf("len(&lex.Lex.Keys() []interface{}) != n")
+	}
+}
+
+func TestLen(t *testing.T) {
+	var ok = len(l) == l.Len()
+	if !ok {
+		t.Fatalf("len(&lex.Lex.Len() int) != n")
+	}
+}
