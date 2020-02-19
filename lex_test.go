@@ -192,3 +192,17 @@ func TestGetLength(t *testing.T) {
 		t.Fatalf("(&lex.Lex.Get(interface{}) (interface{}, _, _)) != interface{}")
 	}
 }
+
+func TestHas(t *testing.T) {
+	var (
+		size = len(l)
+	)
+	var (
+		k = (rand.Intn(size*2-size+1) + size)
+	)
+	l.Add(k, k)
+	var ok = l.Has(k)
+	if !ok {
+		t.Fatalf("(&lex.Lex.Has(interface{}) (bool)) != true")
+	}
+}
