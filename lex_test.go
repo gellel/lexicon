@@ -135,3 +135,22 @@ func TestEach(t *testing.T) {
 		}
 	})
 }
+
+func TestEachSome(t *testing.T) {
+	var (
+		size = (rand.Intn(10-5+1) + 5)
+	)
+	var (
+		k = make([]interface{}, size)
+	)
+	for i := 0; i < size; i++ {
+		k = append(k, i)
+	}
+	var (
+		v = l.FetchSome(k...)
+	)
+	var ok = len(v) == len(k)
+	if !ok {
+		t.Fatalf("len(&lex.Lex.EachSome(interface{}...) []interface{}) != n")
+	}
+}
