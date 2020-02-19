@@ -117,3 +117,21 @@ func TestDelOK(t *testing.T) {
 		t.Fatalf("(&lex.Lex.DelOK(interface{}) (bool)) != true")
 	}
 }
+
+func TestEach(t *testing.T) {
+	var (
+		size = (rand.Intn(10-5+1) + 5)
+	)
+	var (
+		k = make([]interface{}, size)
+	)
+	for i := 0; i < size; i++ {
+		k = append(k, i)
+	}
+	l.Each(func(x, v interface{}) {
+		var ok = k[x.(int)] == v
+		if !ok {
+			t.Fatalf("(&lex.Lex.Each(func(interface{}, interface{}))) != interface{}, interface{}")
+		}
+	})
+}

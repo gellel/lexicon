@@ -71,7 +71,7 @@ func (lex *Lex) DelSome(k ...interface{}) *Lex {
 }
 
 // DelOK deletes the key and element from the map and returns a boolean on the status of the transaction.
-func (lex *Lex) DelOK(k interface{}) bool { return lex.Del(k).Has(k) }
+func (lex *Lex) DelOK(k interface{}) bool { return (lex.Del(k).Has(k) == false) }
 
 // Each executes a provided function once for each map element.
 func (lex *Lex) Each(fn func(k interface{}, v interface{})) *Lex {
