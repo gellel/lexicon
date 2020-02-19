@@ -154,3 +154,18 @@ func TestEachSome(t *testing.T) {
 		t.Fatalf("len(&lex.Lex.EachSome(interface{}...) []interface{}) != n")
 	}
 }
+
+func TestGet(t *testing.T) {
+	var (
+		k = (rand.Intn(10-5+1) + 5)
+	)
+	l.Add(k, v)
+	var v, ok = l.Get(k)
+	if !ok {
+		t.Fatalf("(&lex.Lex.Get(interface{}) (_, bool)) != true")
+	}
+	ok = v == k
+	if !ok {
+		t.Fatalf("(&lex.Lex.Add(interface{}, interface{}) (interface{},)) != interface{}")
+	}
+}
