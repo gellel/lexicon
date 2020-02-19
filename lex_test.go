@@ -1,6 +1,7 @@
 package lex_test
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -190,5 +191,54 @@ func TestGetLength(t *testing.T) {
 	ok = v == k
 	if !ok {
 		t.Fatalf("(&lex.Lex.Get(interface{}) (interface{}, _, _)) != interface{}")
+	}
+}
+
+func TestHas(t *testing.T) {
+	var (
+		size = len(l)
+	)
+	var (
+		k = (rand.Intn(size*2-size+1) + size)
+	)
+	l.Add(k, k)
+	var ok = l.Has(k)
+	if !ok {
+		t.Fatalf("(&lex.Lex.Has(interface{}) (bool)) != true")
+	}
+}
+
+func TestKeys(t *testing.T) {
+	var (
+		a = []interface{}{}
+		k interface{}
+		v = []interface{}{}
+	)
+	for k = range l {
+		v = append(v, k)
+	}
+	a = l.Keys()
+	var ok = len(a) == len(v)
+	if !ok {
+		t.Fatalf("len(&lex.Lex.Keys() []interface{}) != n")
+	}
+}
+
+func TestLen(t *testing.T) {
+	var ok = len(l) == l.Len()
+	if !ok {
+		t.Fatalf("len(&lex.Lex.Len() int) != n")
+	}
+}
+
+func TestMap(t *testing.T) {
+	l.Map(func(_, v interface{}) interface{} {
+		return fmt.Sprintf("%v", v)
+	})
+	for _, v := range l {
+		switch v.(type) {
+		case int:
+			t.Fatalf("len(&lex.Lex.Map(func(interface{}, interface{}) interface{})) != string")
+		}
 	}
 }
