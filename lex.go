@@ -4,6 +4,7 @@ var _ lexer = (&Lex{})
 
 type lexer interface {
 	Add(interface{}, interface{}) *Lex
+	AddLength(interface{}, interface{}) int
 	AddOK(interface{}, interface{}) bool
 	Del(interface{}) *Lex
 	DelAll() *Lex
@@ -16,6 +17,7 @@ type lexer interface {
 	Fetch(interface{}) interface{}
 	FetchSome(...interface{}) []interface{}
 	Get(interface{}) (interface{}, bool)
+	GetLength(interface{}) (interface{}, int, bool)
 	Has(interface{}) bool
 	Keys() []interface{}
 	Len() int
@@ -36,6 +38,9 @@ func (lex *Lex) Add(k interface{}, v interface{}) *Lex {
 	(*lex)[k] = v
 	return lex
 }
+
+// AddLength adds a new key and element to the map and returns the length of the modified map.
+func (lex *Lex) AddLength(k interface{}, v interface{}) int { return lex.Add(k, v).Len() }
 
 // AddOK adds a key and element to the map and returns a boolean on the status of the transaction.
 // AddOK returns false if a key already exists.
@@ -145,6 +150,14 @@ func (lex *Lex) FetchSome(k ...interface{}) []interface{} {
 func (lex *Lex) Get(k interface{}) (interface{}, bool) {
 	var v, ok = (*lex)[k]
 	return v, ok
+}
+
+// GetLength gets the element from the map at the key address and returns the length of the map.
+// Returns an additional boolean if the element was found using the key.
+func (lex *Lex) GetLength(k interface{}) (interface{}, int, bool) {
+	var v, ok = lex.Get(k)
+	var l = lex.Len()
+	return v, l, ok
 }
 
 // Has checks that the map has a key of the corresponding element in the map.
