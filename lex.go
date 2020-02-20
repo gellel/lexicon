@@ -24,8 +24,8 @@ type lexer interface {
 	Keys() []interface{}
 	Len() int
 	Map(func(interface{}, interface{}) interface{}) *Lex
-	MapBreak(func(interface{}, interface{}) (interface{}, bool))
-	MapOK(func(interface{}, interface{}) (interface{}, bool))
+	MapBreak(func(interface{}, interface{}) (interface{}, bool)) *Lex
+	MapOK(func(interface{}, interface{}) (interface{}, bool)) *Lex
 	Not(interface{}) bool
 	NotSome(...interface{}) bool
 	Values() []interface{}
@@ -83,7 +83,7 @@ func (lex *Lex) DelSome(k ...interface{}) *Lex {
 }
 
 // DelSomeLength deletes some keys and values from the map and returns the length of modified map.
-func (lex *Lex) DelSomeLength(k ...interface{}) *Lex { return (lex.DelSome(k...).Len()) }
+func (lex *Lex) DelSomeLength(k ...interface{}) int { return (lex.DelSome(k...).Len()) }
 
 // DelOK deletes the key and value from the map and returns a boolean on the outcome of the transaction.
 func (lex *Lex) DelOK(k interface{}) bool { return (lex.Del(k).Has(k) == false) }
@@ -196,7 +196,7 @@ func (lex *Lex) Map(fn func(k interface{}, v interface{}) interface{}) *Lex {
 
 // MapBreak executes a provided function once for each key, value in the map and sets
 // returned value to the current key with an optional break when the function returns false.
-func (lex *Lex) MapBreak(fn func(k interface{}, v interface{}) (interface{}, bool)) {
+func (lex *Lex) MapBreak(fn func(k interface{}, v interface{}) (interface{}, bool)) *Lex {
 	var ok bool
 	lex.EachBreak(func(k, v interface{}) bool {
 		v, ok = fn(k, v)
@@ -209,7 +209,7 @@ func (lex *Lex) MapBreak(fn func(k interface{}, v interface{}) (interface{}, boo
 
 // MapOK executes a provided function once for each key, value in the map and sets
 // the returned value to the current key if a boolean of true is returned.
-func (lex *Lex) MapOK(fn func(k interface{}, v interface{}) (interface{}, bool)) {
+func (lex *Lex) MapOK(fn func(k interface{}, v interface{}) (interface{}, bool)) *Lex {
 	var ok bool
 	lex.Each(func(k interface{}, v interface{}) {
 		v, ok = fn(k, v)
