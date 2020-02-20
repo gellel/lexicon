@@ -8,6 +8,7 @@ type lexer interface {
 	AddOK(interface{}, interface{}) bool
 	Del(interface{}) *Lex
 	DelAll() *Lex
+	DelLength(interface{}) int
 	DelSome(...interface{}) *Lex
 	DelOK(interface{}) bool
 	Each(func(interface{}, interface{})) *Lex
@@ -22,7 +23,10 @@ type lexer interface {
 	Keys() []interface{}
 	Len() int
 	Map(func(interface{}, interface{}) interface{}) *Lex
+	MapBreak(func(interface{}, interface{}) (interface{}, bool))
+	MapOK(func(interface{}, interface{}) (interface{}, bool))
 	Not(interface{}) bool
+	NotSome(...interface{}) bool
 	Values() []interface{}
 }
 
@@ -66,6 +70,9 @@ func (lex *Lex) DelAll() *Lex {
 	(*lex) = (Lex{})
 	return lex
 }
+
+// DelLength deletes the key and element from the map and returns the modified map.
+func (lex *Lex) DelLength(k interface{}) int { return (lex.Del(k).Len()) }
 
 // DelSome deletes some keys and elements from the map and returns the modified map. Arguments are treated as keys to the map.
 func (lex *Lex) DelSome(k ...interface{}) *Lex {
@@ -189,8 +196,46 @@ func (lex *Lex) Map(fn func(k interface{}, v interface{}) interface{}) *Lex {
 	return lex
 }
 
+// MapBreak executes a provided function once for each element in the map and sets
+// return value to the current key with an optional break when the function returns false.
+func (lex *Lex) MapBreak(fn func(k interface{}, v interface{}) (interface{}, bool)) {
+	var ok bool
+	lex.EachBreak(func(k, v interface{}) bool {
+		v, ok = fn(k, v)
+		if ok {
+			lex.Add(k, v)
+		}
+		return ok
+	})
+}
+
+// MapOK executes a provided function once for each element in the map and sets
+// the returned value to the current key if a boolean of true is returned.
+func (lex *Lex) MapOK(fn func(k interface{}, v interface{}) (interface{}, bool)) {
+	var ok bool
+	lex.Each(func(k interface{}, v interface{}) {
+		v, ok = fn(k, v)
+		if ok {
+			lex.Add(k, v)
+		}
+	})
+}
+
 // Not checks that the map does not have a key in the map.
 func (lex *Lex) Not(k interface{}) bool { return (lex.Has(k) == false) }
+
+// NotSome checks that the map does not have a series of keys in the map.
+func (lex *Lex) NotSome(k ...interface{}) bool {
+	var ok = true
+	var x interface{}
+	for _, x = range k {
+		ok = lex.Not(x)
+		if !ok {
+			break
+		}
+	}
+	return ok
+}
 
 // Values returns a slice of the map values in order found.
 func (lex *Lex) Values() []interface{} {
