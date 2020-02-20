@@ -25,6 +25,7 @@ type lexer interface {
 	MapBreak(func(interface{}, interface{}) (interface{}, bool))
 	MapOK(func(interface{}, interface{}) (interface{}, bool))
 	Not(interface{}) bool
+	NotSome(...interface{}) bool
 	Values() []interface{}
 }
 
@@ -218,6 +219,19 @@ func (lex *Lex) MapOK(fn func(k interface{}, v interface{}) (interface{}, bool))
 
 // Not checks that the map does not have a key in the map.
 func (lex *Lex) Not(k interface{}) bool { return (lex.Has(k) == false) }
+
+// NotSome checks that the map does not have a series of keys in the map.
+func (lex *Lex) NotSome(k ...interface{}) bool {
+	var ok = true
+	var x interface{}
+	for _, x = range k {
+		ok = lex.Not(x)
+		if !ok {
+			break
+		}
+	}
+	return ok
+}
 
 // Values returns a slice of the map values in order found.
 func (lex *Lex) Values() []interface{} {

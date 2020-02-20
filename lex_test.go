@@ -248,10 +248,47 @@ func TestNot(t *testing.T) {
 		size = len(l)
 	)
 	var (
-		k = (rand.Intn(size*2-size+1) + size)
+		k = (rand.Intn(size+1*2-size+2) + size)
 	)
 	var ok = l.Not(k)
 	if !ok {
 		t.Fatalf("(&lex.Lex.Not(interface{}) (bool)) != true")
+	}
+}
+
+func TestNotSome(t *testing.T) {
+	var (
+		size = len(l)
+	)
+	var (
+		k = (rand.Intn(size*2-size+1) + size)
+	)
+	var v = []interface{}{}
+	l = lex.Lex{}
+	for i := k; i > size; i-- {
+		v = append(v, i)
+	}
+	var ok = l.NotSome(v...)
+	if !ok {
+		t.Fatalf("(&lex.Lex.NotSome(...interface{}) (bool)) != true")
+	}
+}
+
+func TestValues(t *testing.T) {
+	var (
+		k = (rand.Intn(10-5+1) + 5)
+	)
+	var (
+		a = make([]interface{}, k)
+		b []interface{}
+	)
+	for i := 0; i != k; i++ {
+		a[i] = i
+		l.Add(i, i)
+	}
+	b = l.Values()
+	var ok = len(a) == len(b)
+	if !ok {
+		t.Fatalf("len(&lex.Lex.Values() []interface{}) != n")
 	}
 }
