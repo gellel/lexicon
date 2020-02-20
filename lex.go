@@ -8,6 +8,7 @@ type lexer interface {
 	AddOK(interface{}, interface{}) bool
 	Del(interface{}) *Lex
 	DelAll() *Lex
+	DelLength(interface{}) int
 	DelSome(...interface{}) *Lex
 	DelOK(interface{}) bool
 	Each(func(interface{}, interface{})) *Lex
@@ -69,6 +70,9 @@ func (lex *Lex) DelAll() *Lex {
 	(*lex) = (Lex{})
 	return lex
 }
+
+// DelLength deletes the key and element from the map and returns the modified map.
+func (lex *Lex) DelLength(k interface{}) int { return (lex.Del(k).Len()) }
 
 // DelSome deletes some keys and elements from the map and returns the modified map. Arguments are treated as keys to the map.
 func (lex *Lex) DelSome(k ...interface{}) *Lex {
