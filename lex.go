@@ -205,6 +205,7 @@ func (lex *Lex) MapBreak(fn func(k interface{}, v interface{}) (interface{}, boo
 		}
 		return ok
 	})
+	return lex
 }
 
 // MapOK executes a provided function once for each key, value in the map and sets
@@ -217,6 +218,7 @@ func (lex *Lex) MapOK(fn func(k interface{}, v interface{}) (interface{}, bool))
 			lex.Add(k, v)
 		}
 	})
+	return lex
 }
 
 // Not checks that the map does not contain the argument key in the map.
