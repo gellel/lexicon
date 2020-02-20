@@ -242,3 +242,16 @@ func TestMap(t *testing.T) {
 		}
 	}
 }
+
+func TestNot(t *testing.T) {
+	var (
+		size = len(l)
+	)
+	var (
+		k = (rand.Intn(size*2-size+1) + size)
+	)
+	var ok = l.Not(k)
+	if !ok {
+		t.Fatalf("(&lex.Lex.Not(interface{}) (bool)) != true")
+	}
+}
