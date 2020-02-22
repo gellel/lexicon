@@ -42,10 +42,43 @@ type stringer struct {
 	l  *Lex
 }
 
-func (stringer *stringer) Add(k interface{}, v string) Stringer  { stringer.l.Add(k, v); return stringer }
-func (stringer *stringer) AddLength(k interface{}, v string) int { return stringer.l.AddLength(k, v) }
-func (stringer *stringer) AddOK(k interface{}, v string) bool    { return stringer.l.AddOK(k, v) }
-func (stringer *stringer) Del(k interface{}) Stringer            { stringer.l.Del(k); return stringer }
-func (stringer *stringer) DelAll() Stringer                      { stringer.l.DelAll(); return stringer }
-func (stringer *stringer) DelSome(k ...interface{}) Stringer     { stringer.DelSome(k...); return stringer }
-func (stringer *stringer) DelSomeLength(k ...interface{}) int    { return stringer.l.DelSomeLength() }
+func (stringer *stringer) Add(k interface{}, v string) Stringer {
+	stringer.l.Add(k, v)
+	return stringer
+}
+func (stringer *stringer) AddLength(k interface{}, v string) int {
+	return stringer.l.AddLength(k, v)
+}
+func (stringer *stringer) AddOK(k interface{}, v string) bool {
+	return stringer.l.AddOK(k, v)
+}
+func (stringer *stringer) Del(k interface{}) Stringer {
+	stringer.l.Del(k)
+	return stringer
+}
+func (stringer *stringer) DelAll() Stringer {
+	stringer.l.DelAll()
+	return stringer
+}
+func (stringer *stringer) DelSome(k ...interface{}) Stringer {
+	stringer.DelSome(k...)
+	return stringer
+}
+func (stringer *stringer) DelSomeLength(k ...interface{}) int {
+	return stringer.l.DelSomeLength()
+}
+func (stringer *stringer) DelOK(k interface{}) bool {
+	return stringer.l.DelOK(k)
+}
+func (stringer *stringer) Each(fn func(interface{}, string)) Stringer {
+	stringer.l.Each(func(k, v interface{}) {
+		fn(k, v.(string))
+	})
+	return stringer
+}
+func (stringer *stringer) EachBreak(fn func(k, v interface{}) bool) Stringer {
+	stringer.l.EachBreak(func(k, v interface{}) bool {
+		return fn(k, v.(string))
+	})
+	return stringer
+}
