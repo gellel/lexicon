@@ -82,3 +82,13 @@ func (stringer *stringer) EachBreak(fn func(k, v interface{}) bool) Stringer {
 	})
 	return stringer
 }
+func (stringer *stringer) EachKey(fn func(k interface{})) Stringer {
+	stringer.l.EachKey(fn)
+	return stringer
+}
+func (stringer *stringer) EachValue(fn func(v string)) Stringer {
+	stringer.l.EachValue(func(v interface{}) {
+		fn(v.(string))
+	})
+	return stringer
+}
