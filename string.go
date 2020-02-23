@@ -4,7 +4,7 @@ import "sync"
 
 // var _ Stringer = (&stringer{})(nil)
 
-// Stringer is map-like interface that holds a collection of strings.
+// Stringer is the interface that manages key value pairs
 //
 // Stringer accepts any interface as a key but expects a string as its value.
 // Stringer is safe for concurrent use by multiple goroutines without additional locking or coordination.
@@ -24,6 +24,7 @@ type Stringer interface {
 	EachValue(func(interface{})) Stringer
 	Fetch(interface{}) interface{}
 	FetchSome(...interface{}) []interface{}
+	FetchSomeLength(...interface{}) ([]interface{}, int)
 	Get(interface{}) (interface{}, bool)
 	GetLength(interface{}) (interface{}, int, bool)
 	Has(interface{}) bool
@@ -34,6 +35,7 @@ type Stringer interface {
 	MapOK(func(interface{}, string) (interface{}, bool)) Stringer
 	Not(interface{}) bool
 	NotSome(...interface{}) bool
+	NotSomeLength(...interface{})
 	Values() []interface{}
 }
 
@@ -43,23 +45,43 @@ type stringer struct {
 }
 
 func (stringer *stringer) Add(k interface{}, v string) Stringer {
+	stringer.mu.Lock()
 	stringer.l.Add(k, v)
+	stringer.mu.Unlock()
 	return stringer
 }
 func (stringer *stringer) AddLength(k interface{}, v string) int {
-	return stringer.l.AddLength(k, v)
+	stringer.mu.Lock()
+	var l = stringer.l.AddLength(k, v)
+	stringer.mu.Unlock()
+	return l
 }
 func (stringer *stringer) AddOK(k interface{}, v string) bool {
-	return stringer.l.AddOK(k, v)
+	stringer.mu.Lock()
+	var ok = stringer.l.AddOK(k, v)
+	stringer.mu.Unlock()
+	return ok
 }
 func (stringer *stringer) Del(k interface{}) Stringer {
+	stringer.mu.Lock()
 	stringer.l.Del(k)
+	stringer.mu.Unlock()
 	return stringer
 }
 func (stringer *stringer) DelAll() Stringer {
+	stringer.mu.Lock()
 	stringer.l.DelAll()
+	stringer.mu.Unlock()
 	return stringer
 }
+
+func (stringer *stringer) DelLength(k interface{}) int {
+	stringer.mu.Lock()
+	var l = stringer.l.DelLength(k)
+	stringer.mu.Unlock()
+	return l
+}
+
 func (stringer *stringer) DelSome(k ...interface{}) Stringer {
 	stringer.DelSome(k...)
 	return stringer
