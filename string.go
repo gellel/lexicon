@@ -30,12 +30,15 @@ type Stringer interface {
 	Has(interface{}) bool
 	Keys() []interface{}
 	Len() int
+	Lock() Stringer
 	Map(func(interface{}, string) interface{}) Stringer
 	MapBreak(func(interface{}, string) (interface{}, bool)) Stringer
 	MapOK(func(interface{}, string) (interface{}, bool)) Stringer
+	Mutate(func()) Stringer
 	Not(interface{}) bool
 	NotSome(...interface{}) bool
 	NotSomeLength(...interface{})
+	Unlock() Stringer
 	Values() []interface{}
 }
 
@@ -45,15 +48,11 @@ type stringer struct {
 }
 
 func (stringer *stringer) Add(k interface{}, v string) Stringer {
-	stringer.mu.Lock()
-	stringer.l.Add(k, v)
-	stringer.mu.Unlock()
-	return stringer
+	return stringer.Mutate(func() { stringer.l.Add(k, v) })
 }
 func (stringer *stringer) AddLength(k interface{}, v string) int {
-	stringer.mu.Lock()
-	var l = stringer.l.AddLength(k, v)
-	stringer.mu.Unlock()
+	var l int
+	stringer.Mutate(func() { l = stringer.l.AddLength(k, v) })
 	return l
 }
 func (stringer *stringer) AddOK(k interface{}, v string) bool {
@@ -83,7 +82,9 @@ func (stringer *stringer) DelLength(k interface{}) int {
 }
 
 func (stringer *stringer) DelSome(k ...interface{}) Stringer {
-	stringer.DelSome(k...)
+	stringer.mu.Lock()
+	stringer.l.DelSome(k...)
+	stringer.mu.Unlock()
 	return stringer
 }
 func (stringer *stringer) DelSomeLength(k ...interface{}) int {
@@ -112,5 +113,21 @@ func (stringer *stringer) EachValue(fn func(v string)) Stringer {
 	stringer.l.EachValue(func(v interface{}) {
 		fn(v.(string))
 	})
+	return stringer
+}
+func (stringer *stringer) Lock() Stringer {
+	stringer.mu.Lock()
+	return stringer
+}
+
+func (stringer *stringer) Mutate(fn func()) Stringer {
+	stringer.mu.Lock()
+	fn()
+	stringer.mu.Unlock()
+	return stringer
+}
+
+func (stringer *stringer) Unlock() Stringer {
+	stringer.mu.Unlock()
 	return stringer
 }
