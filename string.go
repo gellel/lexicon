@@ -50,42 +50,49 @@ type stringer struct {
 func (stringer *stringer) Add(k interface{}, v string) Stringer {
 	return stringer.Mutate(func() { stringer.l.Add(k, v) })
 }
+
 func (stringer *stringer) AddLength(k interface{}, v string) int {
 	var l int
 	stringer.Mutate(func() { l = stringer.l.AddLength(k, v) })
 	return l
 }
+
 func (stringer *stringer) AddOK(k interface{}, v string) bool {
 	var ok bool
 	stringer.Mutate(func() { ok = stringer.l.AddOK(k, v) })
 	return ok
 }
+
 func (stringer *stringer) Del(k interface{}) Stringer {
 	return stringer.Mutate(func() { stringer.l.Del(k) })
 }
+
 func (stringer *stringer) DelAll() Stringer {
 	return stringer.Mutate(func() { stringer.l.DelAll() })
 }
 
 func (stringer *stringer) DelLength(k interface{}) int {
-	stringer.mu.Lock()
-	var l = stringer.l.DelLength(k)
-	stringer.mu.Unlock()
+	var l int
+	stringer.Mutate(func() { stringer.l.DelLength(k) })
 	return l
 }
 
 func (stringer *stringer) DelSome(k ...interface{}) Stringer {
-	stringer.mu.Lock()
-	stringer.l.DelSome(k...)
-	stringer.mu.Unlock()
-	return stringer
+	return stringer.Mutate(func() { stringer.l.DelSome(k...) })
 }
+
 func (stringer *stringer) DelSomeLength(k ...interface{}) int {
-	return stringer.l.DelSomeLength()
+	var l int
+	stringer.Mutate(func() { l = stringer.l.DelSomeLength() })
+	return l
 }
+
 func (stringer *stringer) DelOK(k interface{}) bool {
-	return stringer.l.DelOK(k)
+	var ok bool
+	stringer.Mutate(func() { ok = stringer.l.DelOK(k) })
+	return ok
 }
+
 func (stringer *stringer) Each(fn func(interface{}, string)) Stringer {
 	stringer.l.Each(func(k, v interface{}) {
 		fn(k, v.(string))
