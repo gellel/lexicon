@@ -56,22 +56,15 @@ func (stringer *stringer) AddLength(k interface{}, v string) int {
 	return l
 }
 func (stringer *stringer) AddOK(k interface{}, v string) bool {
-	stringer.mu.Lock()
-	var ok = stringer.l.AddOK(k, v)
-	stringer.mu.Unlock()
+	var ok bool
+	stringer.Mutate(func() { ok = stringer.l.AddOK(k, v) })
 	return ok
 }
 func (stringer *stringer) Del(k interface{}) Stringer {
-	stringer.mu.Lock()
-	stringer.l.Del(k)
-	stringer.mu.Unlock()
-	return stringer
+	return stringer.Mutate(func() { stringer.l.Del(k) })
 }
 func (stringer *stringer) DelAll() Stringer {
-	stringer.mu.Lock()
-	stringer.l.DelAll()
-	stringer.mu.Unlock()
-	return stringer
+	return stringer.Mutate(func() { stringer.l.DelAll() })
 }
 
 func (stringer *stringer) DelLength(k interface{}) int {
