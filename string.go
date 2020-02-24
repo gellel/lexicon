@@ -94,36 +94,59 @@ func (stringer *stringer) DelOK(k interface{}) bool {
 }
 
 func (stringer *stringer) Each(fn func(interface{}, string)) Stringer {
-	stringer.l.Each(func(k, v interface{}) {
-		fn(k, v.(string))
+	stringer.Mutate(func() {
+		stringer.l.Each(func(k, v interface{}) {
+			fn(k, v.(string))
+		})
 	})
 	return stringer
 }
+
 func (stringer *stringer) EachBreak(fn func(k, v interface{}) bool) Stringer {
-	stringer.l.EachBreak(func(k, v interface{}) bool {
-		return fn(k, v.(string))
+	stringer.Mutate(func() {
+		stringer.l.EachBreak(func(k, v interface{}) bool {
+			return fn(k, v.(string))
+		})
 	})
 	return stringer
 }
+
 func (stringer *stringer) EachKey(fn func(k interface{})) Stringer {
-	stringer.l.EachKey(fn)
-	return stringer
-}
-func (stringer *stringer) EachValue(fn func(v string)) Stringer {
-	stringer.l.EachValue(func(v interface{}) {
-		fn(v.(string))
+	stringer.Mutate(func() {
+		stringer.l.EachKey(fn)
 	})
 	return stringer
 }
+
+func (stringer *stringer) EachValue(fn func(v string)) Stringer {
+	stringer.Mutate(func() {
+		stringer.l.EachValue(func(v interface{}) {
+			fn(v.(string))
+		})
+	})
+	return stringer
+}
+
+func (stringer *stringer) Fetch(k interface{}) string {
+	var s string
+	stringer.Mutate(func() {
+		var v = stringer.l.Fetch(k)
+		if v != nil {
+			s = v.(string)
+		}
+	})
+	return s
+}
+
 func (stringer *stringer) Lock() Stringer {
 	stringer.mu.Lock()
 	return stringer
 }
 
 func (stringer *stringer) Mutate(fn func()) Stringer {
-	stringer.mu.Lock()
+	stringer.Lock()
 	fn()
-	stringer.mu.Unlock()
+	stringer.Unlock()
 	return stringer
 }
 
