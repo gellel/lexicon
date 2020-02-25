@@ -158,11 +158,21 @@ func (stringer *stringer) FetchSomeLength(k ...interface{}) ([]string, int) {
 
 func (stringer *stringer) Get(k interface{}) (string, bool) {
 	var s string
-	var v, ok = stringer.l.Get(k)
-	if v != nil {
-		s = v.(string)
-	}
+	var v interface{}
+	var ok bool
+	stringer.Mutate(func() {
+		v, ok = stringer.l.Get(k)
+		if v != nil {
+			s = v.(string)
+		}
+	})
 	return s, ok
+}
+
+func (stringer *stringer) GetLength(k interface{}) (string, int, bool) {
+	var s, ok = stringer.Get(k)
+	var l = stringer.l.Len()
+	return s, l, ok
 }
 
 func (stringer *stringer) Lock() Stringer {
