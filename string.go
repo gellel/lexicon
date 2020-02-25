@@ -2,7 +2,11 @@ package lex
 
 import "sync"
 
-// var _ Stringer = (&stringer{})(nil)
+var _ Stringer = (&stringer{})
+
+func NewStringer() Stringer {
+	return stringer{sync.Mutex{}, &stringer{}}
+}
 
 // Stringer is the interface that manages key value pairs
 //
@@ -35,7 +39,7 @@ type Stringer interface {
 	MapOK(func(interface{}, string) (string, bool)) Stringer
 	Not(interface{}) bool
 	NotSome(...interface{}) bool
-	NotSomeLength(...interface{})
+	NotSomeLength(...interface{}) (int, bool)
 	Values() []string
 }
 
@@ -170,11 +174,27 @@ func (stringer *stringer) GetLength(k interface{}) (string, int, bool) {
 }
 
 func (stringer *stringer) Has(k interface{}) bool {
-	return stringer.l.Has(k)
+	var ok bool
+	stringer.Mutate(func() {
+		ok = stringer.l.Has(k)
+	})
+	return ok
+}
+
+func (stringer *stringer) HasSome(k ...interface{}) bool {
+	var ok bool
+	stringer.Mutate(func() {
+		ok = stringer.l.HasSome(k...)
+	})
+	return ok
 }
 
 func (stringer *stringer) Keys() []interface{} {
-	return stringer.l.Keys()
+	var s []interface{}
+	stringer.Mutate(func() {
+		s = stringer.l.Keys()
+	})
+	return s
 }
 
 func (stringer *stringer) Len() int {
@@ -214,4 +234,20 @@ func (stringer *stringer) Mutate(fn func()) Stringer {
 	fn()
 	stringer.Unlock()
 	return stringer
+}
+
+func (stringer *stringer) Not(k interface{}) bool {
+	var ok bool
+	stringer.Mutate(func() {
+		ok = stringer.l.Not(k)
+	})
+	return ok
+}
+
+func (stringer *stringer) NotSome(k ...interface{}) bool {
+	var ok bool
+	stringer.Mutate(func() {
+		ok = stringer.l.NotSome(k...)
+	})
+	return ok
 }

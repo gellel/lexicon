@@ -21,6 +21,7 @@ type lexer interface {
 	Get(interface{}) (interface{}, bool)
 	GetLength(interface{}) (interface{}, int, bool)
 	Has(interface{}) bool
+	HasSome(...interface{}) bool
 	Keys() []interface{}
 	Len() int
 	Map(func(interface{}, interface{}) interface{}) *Lex
@@ -169,6 +170,19 @@ func (lex *Lex) GetLength(k interface{}) (interface{}, int, bool) {
 // Has checks that the map has a key of the corresponding value in the map.
 func (lex *Lex) Has(k interface{}) bool {
 	var _, ok = lex.Get(k)
+	return ok
+}
+
+// HasSome checks that the map contains the series of key in the map.
+func (lex *Lex) HasSome(k ...interface{}) bool {
+	var ok bool
+	var x interface{}
+	for _, x = range k {
+		ok = lex.Has(k)
+		if !ok {
+			break
+		}
+	}
 	return ok
 }
 
