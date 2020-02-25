@@ -25,7 +25,7 @@ type Stringer interface {
 	Fetch(interface{}) string
 	FetchSome(...interface{}) []string
 	FetchSomeLength(...interface{}) ([]string, int)
-	Get(interface{}) (interface{}, bool)
+	Get(interface{}) (string, bool)
 	GetLength(interface{}) (string, int, bool)
 	Has(interface{}) bool
 	Keys() []interface{}
@@ -40,8 +40,8 @@ type Stringer interface {
 }
 
 type stringer struct {
-	mu sync.Mutex
-	l  *Lex
+	sync.Mutex
+	l *Lex
 }
 
 func (stringer *stringer) Add(k interface{}, v string) Stringer {
@@ -109,10 +109,7 @@ func (stringer *stringer) EachBreak(fn func(k interface{}, v string) bool) Strin
 }
 
 func (stringer *stringer) EachKey(fn func(k interface{})) Stringer {
-	stringer.Mutate(func() {
-		stringer.l.EachKey(fn)
-	})
-	return stringer
+	return stringer.Mutate(func() { stringer.l.EachKey(fn) })
 }
 
 func (stringer *stringer) EachValue(fn func(v string)) Stringer {
@@ -152,7 +149,7 @@ func (stringer *stringer) FetchSome(k ...interface{}) []string {
 
 func (stringer *stringer) FetchSomeLength(k ...interface{}) ([]string, int) {
 	var s = stringer.FetchSome(k...)
-	var l = len(s)
+	var l = stringer.Len()
 	return s, l
 }
 
@@ -171,23 +168,25 @@ func (stringer *stringer) Get(k interface{}) (string, bool) {
 
 func (stringer *stringer) GetLength(k interface{}) (string, int, bool) {
 	var s, ok = stringer.Get(k)
-	var l = stringer.l.Len()
+	var l = stringer.Len()
 	return s, l, ok
 }
 
-func (stringer *stringer) Lock() Stringer {
-	stringer.mu.Lock()
-	return stringer
+func (stringer *stringer) Has(k interface{}) bool {
+	return stringer.l.Has(k)
+}
+
+func (stringer *stringer) Len() int {
+	var l int
+	stringer.Mutate(func() {
+		l = stringer.l.Len()
+	})
+	return l
 }
 
 func (stringer *stringer) Mutate(fn func()) Stringer {
 	stringer.Lock()
 	fn()
 	stringer.Unlock()
-	return stringer
-}
-
-func (stringer *stringer) Unlock() Stringer {
-	stringer.mu.Unlock()
 	return stringer
 }
