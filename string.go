@@ -91,21 +91,19 @@ func (stringer *stringer) DelOK(k interface{}) bool {
 }
 
 func (stringer *stringer) Each(fn func(interface{}, string)) Stringer {
-	stringer.Mutate(func() {
+	return stringer.Mutate(func() {
 		stringer.l.Each(func(k, v interface{}) {
 			fn(k, v.(string))
 		})
 	})
-	return stringer
 }
 
 func (stringer *stringer) EachBreak(fn func(k interface{}, v string) bool) Stringer {
-	stringer.Mutate(func() {
+	return stringer.Mutate(func() {
 		stringer.l.EachBreak(func(k, v interface{}) bool {
 			return fn(k, v.(string))
 		})
 	})
-	return stringer
 }
 
 func (stringer *stringer) EachKey(fn func(k interface{})) Stringer {
@@ -113,12 +111,11 @@ func (stringer *stringer) EachKey(fn func(k interface{})) Stringer {
 }
 
 func (stringer *stringer) EachValue(fn func(v string)) Stringer {
-	stringer.Mutate(func() {
+	return stringer.Mutate(func() {
 		stringer.l.EachValue(func(v interface{}) {
 			fn(v.(string))
 		})
 	})
-	return stringer
 }
 
 func (stringer *stringer) Fetch(k interface{}) string {
@@ -176,12 +173,40 @@ func (stringer *stringer) Has(k interface{}) bool {
 	return stringer.l.Has(k)
 }
 
+func (stringer *stringer) Keys() []interface{} {
+	return stringer.l.Keys()
+}
+
 func (stringer *stringer) Len() int {
 	var l int
 	stringer.Mutate(func() {
 		l = stringer.l.Len()
 	})
 	return l
+}
+
+func (stringer *stringer) Map(fn func(k interface{}, s string) string) Stringer {
+	return stringer.Mutate(func() {
+		stringer.l.Map(func(k, v interface{}) interface{} {
+			return fn(k, v.(string))
+		})
+	})
+}
+
+func (stringer *stringer) MapBreak(fn func(interface{}, string) (string, bool)) Stringer {
+	return stringer.Mutate(func() {
+		stringer.l.MapBreak(func(k, v interface{}) (interface{}, bool) {
+			return fn(k, v.(string))
+		})
+	})
+}
+
+func (stringer *stringer) MapOK(fn func(interface{}, string) (string, bool)) Stringer {
+	return stringer.Mutate(func() {
+		stringer.l.MapOK(func(k, v interface{}) (interface{}, bool) {
+			return fn(k, v.(string))
+		})
+	})
 }
 
 func (stringer *stringer) Mutate(fn func()) Stringer {
