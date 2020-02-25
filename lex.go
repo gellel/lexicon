@@ -178,7 +178,7 @@ func (lex *Lex) HasSome(k ...interface{}) bool {
 	var ok bool
 	var x interface{}
 	for _, x = range k {
-		ok = lex.Has(k)
+		ok = lex.Has(x)
 		if !ok {
 			break
 		}
