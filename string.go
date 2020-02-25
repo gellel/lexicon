@@ -21,25 +21,22 @@ type Stringer interface {
 	Each(func(interface{}, string)) Stringer
 	EachBreak(func(interface{}, string) bool) Stringer
 	EachKey(func(interface{})) Stringer
-	EachValue(func(interface{})) Stringer
-	Fetch(interface{}) interface{}
-	FetchSome(...interface{}) []interface{}
-	FetchSomeLength(...interface{}) ([]interface{}, int)
+	EachValue(func(string)) Stringer
+	Fetch(interface{}) string
+	FetchSome(...interface{}) []string
+	FetchSomeLength(...interface{}) ([]string, int)
 	Get(interface{}) (interface{}, bool)
-	GetLength(interface{}) (interface{}, int, bool)
+	GetLength(interface{}) (string, int, bool)
 	Has(interface{}) bool
 	Keys() []interface{}
 	Len() int
-	Lock() Stringer
-	Map(func(interface{}, string) interface{}) Stringer
-	MapBreak(func(interface{}, string) (interface{}, bool)) Stringer
-	MapOK(func(interface{}, string) (interface{}, bool)) Stringer
-	Mutate(func()) Stringer
+	Map(func(interface{}, string) string) Stringer
+	MapBreak(func(interface{}, string) (string, bool)) Stringer
+	MapOK(func(interface{}, string) (string, bool)) Stringer
 	Not(interface{}) bool
 	NotSome(...interface{}) bool
 	NotSomeLength(...interface{})
-	Unlock() Stringer
-	Values() []interface{}
+	Values() []string
 }
 
 type stringer struct {
@@ -102,7 +99,7 @@ func (stringer *stringer) Each(fn func(interface{}, string)) Stringer {
 	return stringer
 }
 
-func (stringer *stringer) EachBreak(fn func(k, v interface{}) bool) Stringer {
+func (stringer *stringer) EachBreak(fn func(k interface{}, v string) bool) Stringer {
 	stringer.Mutate(func() {
 		stringer.l.EachBreak(func(k, v interface{}) bool {
 			return fn(k, v.(string))
@@ -136,6 +133,36 @@ func (stringer *stringer) Fetch(k interface{}) string {
 		}
 	})
 	return s
+}
+
+func (stringer *stringer) FetchSome(k ...interface{}) []string {
+	var s []string
+	stringer.Mutate(func() {
+		var x interface{}
+		for _, x = range k {
+			var v = stringer.l.Fetch(x)
+			if v == nil {
+				continue
+			}
+			s = append(s, v.(string))
+		}
+	})
+	return s
+}
+
+func (stringer *stringer) FetchSomeLength(k ...interface{}) ([]string, int) {
+	var s = stringer.FetchSome(k...)
+	var l = len(s)
+	return s, l
+}
+
+func (stringer *stringer) Get(k interface{}) (string, bool) {
+	var s string
+	var v, ok = stringer.l.Get(k)
+	if v != nil {
+		s = v.(string)
+	}
+	return s, ok
 }
 
 func (stringer *stringer) Lock() Stringer {
