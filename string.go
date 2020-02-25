@@ -5,7 +5,7 @@ import "sync"
 var _ Stringer = (&stringer{})
 
 func NewStringer() Stringer {
-	return stringer{sync.Mutex{}, &stringer{}}
+	return &stringer{sync.Mutex{}, &Lex{}}
 }
 
 // Stringer is the interface that manages key value pairs
@@ -32,6 +32,7 @@ type Stringer interface {
 	Get(interface{}) (string, bool)
 	GetLength(interface{}) (string, int, bool)
 	Has(interface{}) bool
+	HasSome(...interface{}) bool
 	Keys() []interface{}
 	Len() int
 	Map(func(interface{}, string) string) Stringer
@@ -39,7 +40,6 @@ type Stringer interface {
 	MapOK(func(interface{}, string) (string, bool)) Stringer
 	Not(interface{}) bool
 	NotSome(...interface{}) bool
-	NotSomeLength(...interface{}) (int, bool)
 	Values() []string
 }
 
@@ -250,4 +250,14 @@ func (stringer *stringer) NotSome(k ...interface{}) bool {
 		ok = stringer.l.NotSome(k...)
 	})
 	return ok
+}
+
+func (stringer *stringer) Values() []string {
+	var s = []string{}
+	stringer.Mutate(func() {
+		stringer.EachValue(func(v string) {
+			s = append(s, v)
+		})
+	})
+	return s
 }
