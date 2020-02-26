@@ -4,6 +4,7 @@ import "sync"
 
 var _ Stringer = (&stringer{})
 
+// NewStringer returns a new Stringer interface.
 func NewStringer() Stringer {
 	return &stringer{sync.Mutex{}, &Lex{}}
 }
@@ -44,8 +45,8 @@ type Stringer interface {
 }
 
 type stringer struct {
-	sync.Mutex
-	l *Lex
+	mu sync.Mutex
+	l  *Lex
 }
 
 func (stringer *stringer) Add(k interface{}, v string) Stringer {
@@ -230,9 +231,9 @@ func (stringer *stringer) MapOK(fn func(interface{}, string) (string, bool)) Str
 }
 
 func (stringer *stringer) Mutate(fn func()) Stringer {
-	stringer.Lock()
+	stringer.mu.Lock()
 	fn()
-	stringer.Unlock()
+	stringer.mu.Unlock()
 	return stringer
 }
 
