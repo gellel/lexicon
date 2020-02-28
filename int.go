@@ -9,7 +9,7 @@ func NewInter() Inter {
 	return &inter{sync.Mutex{}, &Lex{}}
 }
 
-// Inter is the interface that manages key value pairs
+// Inter is the interface that manages key value pairs of integers.
 //
 // Inter accepts any interface as a key but expects a int as its value.
 // Inter is safe for concurrent use by multiple goroutines without additional locking or coordination.
