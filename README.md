@@ -116,22 +116,26 @@ type Food struct {
 
 // Fooder is an interface that contains a collection of Food.
 type Fooder interface {
-    Append(Food) Fooder
-    Prepend(Food) Fooder
+    Add(interface{}, Food) Fooder
+    Del(interface{}) Fooder
+    DelOK(interface{}) bool
 }
 
 // fooder is a struct that interfaces with lex.Lex.
-type fooder struct { s *lex.Lex }
+type fooder struct { l *lex.Lex }
 
 // Add adds a Food struct to the map.
-func (f *fooder) Add(food Food) Fooder {
-    f.l.Add(food...)
+func (f *fooder) Add(k interface{}, v Food) Fooder {
+    f.l.Add(k, v)
     return f
 }
 
 // Del deletes a Food struct from the map.
-func (f *fooder) Del(i interface{}) Fooder { 
+func (f *fooder) Del(k interface{}) Fooder { 
     f.l.Del(i)
     return f
 }
+
+// DelOK deletes a Food struct from the map and returns a bool on the outcome of the transaction.
+func (f *fooder) DelOK(k interface{}) bool { ... }
 ```
