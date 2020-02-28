@@ -9,7 +9,7 @@ func NewStringer() Stringer {
 	return &stringer{sync.Mutex{}, &Lex{}}
 }
 
-// Stringer is the interface that manages key value pairs
+// Stringer is the interface that manages key value pairs for strings.
 //
 // Stringer accepts any interface as a key but expects a string as its value.
 // Stringer is safe for concurrent use by multiple goroutines without additional locking or coordination.
