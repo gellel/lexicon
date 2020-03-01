@@ -248,7 +248,7 @@ func TestNot(t *testing.T) {
 		size = len(l)
 	)
 	var (
-		k = (rand.Intn(size+1*2-size+2) + size)
+		k = size + 1
 	)
 	var ok = l.Not(k)
 	if !ok {
