@@ -1,6 +1,8 @@
 package lex_test
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/gellel/lex"
@@ -39,5 +41,32 @@ func TestStringer(t *testing.T) {
 	ok = s.DelOK(k)
 	if !ok {
 		t.Fatalf("(lex.Stringer.DelOK(interface{}) (bool) != true")
+	}
+}
+
+func TestStringerConcurrency(t *testing.T) {
+	var (
+		ok   bool
+		size = 20
+		wg   sync.WaitGroup
+	)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < size/2; i++ {
+			s.AddLength(i, fmt.Sprintf("%d", i))
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := size / 2; i < size; i++ {
+			s.AddLength(i, fmt.Sprintf("%d", i))
+		}
+	}()
+	wg.Wait()
+	ok = s.Len() == size
+	if !ok {
+		t.Fatalf("(lex.Stringer.Len() (int) != int")
 	}
 }
