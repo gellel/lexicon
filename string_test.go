@@ -36,4 +36,8 @@ func TestStringer(t *testing.T) {
 	if !ok {
 		t.Fatalf("(lex.Stringer.Get(interface{}) (string, bool) != (string, _)")
 	}
+	ok = s.DelOK(k)
+	if !ok {
+		t.Fatalf("(lex.Stringer.DelOK(interface{}) (bool) != true")
+	}
 }
