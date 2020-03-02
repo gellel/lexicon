@@ -61,6 +61,7 @@ import (
 
 var (
     b    lex.Byter        // map[interface{}]byte
+    bo   lex.Booler       // map[interface{}]bool
     c64  lex.Complexer64  // map[interface{}]complex64
     c128 lex.Complexer128 // map[interface{}]complex128
     f32  lex.Floater32    // map[interface{}]float32
@@ -71,7 +72,7 @@ var (
     i32  lex.Inter32      // map[interface{}]int32
     i64  lex.Inter64      // map[interface{}]int64
     r    lex.Runer        // map[interface{}]rune
-    s    *lex.Lex         // map[interface{}]interface{}
+    l    *lex.Lex         // map[interface{}]interface{}
     u    lex.UInter       // map[interface{}]uint
     u8   lex.UInter8      // map[interface{}]uint8
     u16  lex.UInter16     // map[interface{}]uint16
