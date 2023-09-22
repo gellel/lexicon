@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  hashtable:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hashtable
+    image: hashtable:latest
