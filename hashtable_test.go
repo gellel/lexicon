@@ -1,8 +1,9 @@
 package hashtable_test
 
 import (
-	"hashtable"
 	"testing"
+
+	"github.com/lindsaygelle/hashtable"
 )
 
 // TestHashtable tests Hashtable.
