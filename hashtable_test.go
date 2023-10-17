@@ -1,6 +1,7 @@
 package hashtable_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/lindsaygelle/hashtable"
@@ -13,7 +14,7 @@ func TestHashtable(t *testing.T) {
 	t.Log(table)
 }
 
-// TestAdd tests Hashtable.Add
+// TestAdd tests Hashtable.Add.
 func TestAdd(t *testing.T) {
 	// Create a new hashtable
 	ht := make(hashtable.Hashtable[string, int])
@@ -109,7 +110,48 @@ func TestAddMany(t *testing.T) {
 	}
 }
 
-// TestDelete tests Hashtable.Delete
+// TestAddOK tests Hashtable.AddOK.
+func TestAddOK(t *testing.T) {
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Test adding a new key-value pair
+	added := ht.AddOK("apple", 5)
+	if !added {
+		t.Error("Expected 'apple' to be added, but it was not.")
+	}
+
+	// Check if the key-value pair is added correctly
+	value, exists := ht["apple"]
+	if !exists || value != 5 {
+		t.Errorf("Expected key 'apple' with value '5', but got value '%d'", value)
+	}
+
+	// Test adding an existing key
+	reAdded := ht.AddOK("apple", 10)
+	if reAdded {
+		t.Error("Expected 'apple' to not be re-added, but it was.")
+	}
+
+	// Check if the value for 'apple' remains unchanged
+	value, exists = ht["apple"]
+	if !exists || value != 5 {
+		t.Errorf("Expected key 'apple' to have value '5' after re-adding attempt, but got value '%d'", value)
+	}
+
+	// Test adding another new key-value pair
+	addedNew := ht.AddOK("banana", 3)
+	if !addedNew {
+		t.Error("Expected 'banana' to be added, but it was not.")
+	}
+
+	// Check if the key-value pair for 'banana' is added correctly
+	value, exists = ht["banana"]
+	if !exists || value != 3 {
+		t.Errorf("Expected key 'banana' with value '3', but got value '%d'", value)
+	}
+}
+
+// TestDelete tests Hashtable.Delete.
 func TestDelete(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
 	ht["apple"] = 5
@@ -135,7 +177,185 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-// TestGet tests Hashtable.Get
+// TestDeleteFunc tests Hashtable.DeleteFunc.
+func TestDeleteFunc(t *testing.T) {
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["orange"] = 7
+	ht["kiwi"] = 6
+
+	// Delete key-value pairs where the value is less than 7
+	ht.DeleteFunc(func(key string, value int) bool {
+		return value < 7
+	})
+
+	// Check if the key-value pair with key "kiwi" is removed
+	_, exists := ht["kiwi"]
+	if exists {
+		t.Error("Expected key 'kiwi' to be removed, but it still exists.")
+	}
+
+	// Check if other key-value pairs are still present
+	_, exists = ht["apple"]
+	if !exists {
+		t.Error("Expected key 'apple' to be present, but it is not.")
+	}
+
+	_, exists = ht["orange"]
+	if !exists {
+		t.Error("Expected key 'orange' to be present, but it is not.")
+	}
+}
+
+// TestDeleteMany tests Hashtable.DeleteMany.
+func TestDeleteMany(t *testing.T) {
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["orange"] = 7
+	ht["kiwi"] = 6
+
+	// Delete key-value pairs with keys "apple" and "kiwi"
+	ht.DeleteMany("apple", "kiwi")
+
+	// Check if the key-value pair with key "apple" is removed
+	_, exists := ht["apple"]
+	if exists {
+		t.Error("Expected key 'apple' to be removed, but it still exists.")
+	}
+
+	// Check if the key-value pair with key "kiwi" is removed
+	_, exists = ht["kiwi"]
+	if exists {
+		t.Error("Expected key 'kiwi' to be removed, but it still exists.")
+	}
+
+	// Check if other key-value pairs are still present
+	_, exists = ht["orange"]
+	if !exists {
+		t.Error("Expected key 'orange' to be present, but it is not.")
+	}
+}
+
+// TestEach tests Hashtable.Each.
+func TestEach(t *testing.T) {
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Function to print all key-value pairs.
+	var printedKeys []string
+	printKeyValue := func(key string, value int) {
+		printedKeys = append(printedKeys, key)
+		fmt.Println(key, value)
+	}
+
+	// Iterate over the hashtable and print all key-value pairs.
+	ht.Each(printKeyValue)
+	// Output: "apple 5", "banana 3", "cherry 8"
+
+	// Check if the printed keys are correct
+	expectedKeys := []string{"apple", "banana", "cherry"}
+	for i, key := range expectedKeys {
+		if printedKeys[i] != key {
+			t.Errorf("Expected key %s, but got %s", key, printedKeys[i])
+		}
+	}
+
+	// Check if other keys are not printed
+	if len(printedKeys) > 3 {
+		t.Errorf("Expected only 'apple', 'banana', and 'cherry' to be printed, but got more keys.")
+	}
+}
+
+// TestEachBreak tests Hashtable.EachBreak.
+func TestEachBreak(t *testing.T) {
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Function to print key-value pairs until finding "banana".
+	var printedKeys []string
+	ht.EachBreak(func(key string, value int) bool {
+		printedKeys = append(printedKeys, key)
+		fmt.Println(key, value)
+		return key != "banana" // Continue printing until "banana" is encountered.
+	})
+	// Output: "apple 5", "banana 3"
+
+	// Check if the printed keys are correct
+	expectedKeys := []string{"apple", "banana"}
+	for i, key := range expectedKeys {
+		if printedKeys[i] != key {
+			t.Errorf("Expected key %s, but got %s", key, printedKeys[i])
+		}
+	}
+
+	// Check if other keys are not printed
+	if len(printedKeys) > 2 {
+		t.Errorf("Expected only 'apple' and 'banana' to be printed, but got more keys.")
+	}
+}
+
+// TestEachKey tests Hashtable.EachKey.
+func TestEachKey(t *testing.T) {
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Function to collect each key in a slice.
+	var collectedKeys []string
+	collectKey := func(key string) {
+		collectedKeys = append(collectedKeys, key)
+	}
+
+	// Iterate over the hashtable and collect each key.
+	ht.EachKey(collectKey)
+
+	// Check if the collected keys are correct
+	expectedKeys := []string{"apple", "banana", "cherry"}
+	if len(collectedKeys) != len(expectedKeys) {
+		t.Errorf("Expected %d keys, but got %d", len(expectedKeys), len(collectedKeys))
+	}
+	for i, key := range expectedKeys {
+		if collectedKeys[i] != key {
+			t.Errorf("Expected key %s, but got %s", key, collectedKeys[i])
+		}
+	}
+}
+
+func TestEachKeyBreak(t *testing.T) {
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Function to print each key and break the iteration if the key is "banana".
+	var collectedKeys []string
+	printAndBreak := func(key string) bool {
+		collectedKeys = append(collectedKeys, key)
+		fmt.Println(key)
+		return key != "banana"
+	}
+
+	// Iterate over the hashtable keys, print them, and break when "banana" is encountered.
+	ht.EachKeyBreak(printAndBreak)
+
+	// Check if the collected keys and the printed output are correct.
+	expectedKeys := []string{"apple", "banana"}
+	if len(collectedKeys) != len(expectedKeys) {
+		t.Errorf("Expected %d keys, but got %d", len(expectedKeys), len(collectedKeys))
+	}
+	for i, key := range expectedKeys {
+		if collectedKeys[i] != key {
+			t.Errorf("Expected key %s, but got %s", key, collectedKeys[i])
+		}
+	}
+}
+
+// TestGet tests Hashtable.Get.
 
 func TestGet(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
