@@ -1,10 +1,12 @@
 package hashtable_test
 
 import (
+	"reflect"
 	"sort"
 	"testing"
 
 	"github.com/lindsaygelle/hashtable"
+	"github.com/lindsaygelle/slice"
 )
 
 // TestHashtable tests Hashtable.
@@ -16,15 +18,15 @@ func TestHashtable(t *testing.T) {
 
 // TestAdd tests Hashtable.Add.
 func TestAdd(t *testing.T) {
-	// Create a new hashtable
+	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
 
-	// Add key-value pairs to the hashtable
+	// Add key-value pairs to the hashtable.
 	ht.Add("apple", 5)
 	ht.Add("banana", 3)
 	ht.Add("cherry", 8)
 
-	// Verify that the key-value pairs have been added correctly
+	// Verify that the key-value pairs have been added correctly.
 	expected := map[string]int{
 		"apple":  5,
 		"banana": 3,
@@ -40,10 +42,10 @@ func TestAdd(t *testing.T) {
 		}
 	}
 
-	// Update the value associated with the "banana" key
+	// Update the value associated with the "banana" key.
 	ht.Add("banana", 10)
 
-	// Verify that the value has been updated correctly
+	// Verify that the value has been updated correctly.
 	if ht["banana"] != 10 {
 		t.Fatalf("Expected value for key 'banana' to be updated to 10, but got %d", ht["banana"])
 	}
@@ -53,60 +55,60 @@ func TestAdd(t *testing.T) {
 func TestAddFunc(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
 
-	// Test case 1: Add key-value pairs where the value is greater than 1
+	// Test case 1: Add key-value pairs where the value is greater than 1.
 	ht.AddFunc([]map[string]int{{"apple": 1, "orange": 2, "banana": 3}}, func(key string, value int) bool {
 		return value > 1
 	})
 
-	// Check if expected key-value pairs are added
+	// Check if expected key-value pairs are added.
 	expected := map[string]int{"orange": 2, "banana": 3}
 	for key, expectedValue := range expected {
 		value, exists := ht.Get(key)
 		if !exists || value != expectedValue {
-			t.Errorf("Expected key '%s' with value '%d', but got value '%d'", key, expectedValue, value)
+			t.Fatalf("Expected key '%s' with value '%d', but got value '%d'", key, expectedValue, value)
 		}
 	}
 
-	// Test case 2: Add all key-value pairs without any validation
+	// Test case 2: Add all key-value pairs without any validation.
 	ht.AddFunc([]map[string]int{{"kiwi": 0, "pear": 4}}, func(key string, value int) bool {
 		return true
 	})
 
-	// Check if all key-value pairs are added
+	// Check if all key-value pairs are added.
 	allValues := map[string]int{"orange": 2, "banana": 3, "kiwi": 0, "pear": 4}
 	for key, expectedValue := range allValues {
 		value, exists := ht.Get(key)
 		if !exists || value != expectedValue {
-			t.Errorf("Expected key '%s' with value '%d', but got value '%d'", key, expectedValue, value)
+			t.Fatalf("Expected key '%s' with value '%d', but got value '%d'", key, expectedValue, value)
 		}
 	}
 }
 
-// TestAddMany tests Hashtable.AddMany
+// TestAddMany tests Hashtable.AddMany.
 
 func TestAddMany(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
 
-	// Test case 1
+	// Test case 1.
 	ht.AddMany(map[string]int{"orange": 7, "grape": 4})
 	expected1 := 7
 	if val, ok := ht["orange"]; !ok || val != expected1 {
-		t.Errorf("Expected %d, but got %d for key 'orange'", expected1, val)
+		t.Fatalf("Expected %d, but got %d for key 'orange'", expected1, val)
 	}
 	expected2 := 4
 	if val, ok := ht["grape"]; !ok || val != expected2 {
-		t.Errorf("Expected %d, but got %d for key 'grape'", expected2, val)
+		t.Fatalf("Expected %d, but got %d for key 'grape'", expected2, val)
 	}
 
-	// Test case 2
+	// Test case 2.
 	ht.AddMany(map[string]int{"kiwi": 6, "pear": 9})
 	expected3 := 6
 	if val, ok := ht["kiwi"]; !ok || val != expected3 {
-		t.Errorf("Expected %d, but got %d for key 'kiwi'", expected3, val)
+		t.Fatalf("Expected %d, but got %d for key 'kiwi'", expected3, val)
 	}
 	expected4 := 9
 	if val, ok := ht["pear"]; !ok || val != expected4 {
-		t.Errorf("Expected %d, but got %d for key 'pear'", expected4, val)
+		t.Fatalf("Expected %d, but got %d for key 'pear'", expected4, val)
 	}
 }
 
@@ -114,40 +116,40 @@ func TestAddMany(t *testing.T) {
 func TestAddOK(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
 
-	// Test adding a new key-value pair
+	// Test adding a new key-value pair.
 	added := ht.AddOK("apple", 5)
 	if !added {
 		t.Error("Expected 'apple' to be added, but it was not.")
 	}
 
-	// Check if the key-value pair is added correctly
+	// Check if the key-value pair is added correctly.
 	value, exists := ht["apple"]
 	if !exists || value != 5 {
-		t.Errorf("Expected key 'apple' with value '5', but got value '%d'", value)
+		t.Fatalf("Expected key 'apple' with value '5', but got value '%d'", value)
 	}
 
-	// Test adding an existing key
+	// Test adding an existing key.
 	reAdded := ht.AddOK("apple", 10)
 	if reAdded {
 		t.Error("Expected 'apple' to not be re-added, but it was.")
 	}
 
-	// Check if the value for 'apple' remains unchanged
+	// Check if the value for 'apple' remains unchanged.
 	value, exists = ht["apple"]
 	if !exists || value != 5 {
-		t.Errorf("Expected key 'apple' to have value '5' after re-adding attempt, but got value '%d'", value)
+		t.Fatalf("Expected key 'apple' to have value '5' after re-adding attempt, but got value '%d'", value)
 	}
 
-	// Test adding another new key-value pair
+	// Test adding another new key-value pair.
 	addedNew := ht.AddOK("banana", 3)
 	if !addedNew {
 		t.Error("Expected 'banana' to be added, but it was not.")
 	}
 
-	// Check if the key-value pair for 'banana' is added correctly
+	// Check if the key-value pair for 'banana' is added correctly.
 	value, exists = ht["banana"]
 	if !exists || value != 3 {
-		t.Errorf("Expected key 'banana' with value '3', but got value '%d'", value)
+		t.Fatalf("Expected key 'banana' with value '3', but got value '%d'", value)
 	}
 }
 
@@ -157,23 +159,23 @@ func TestDelete(t *testing.T) {
 	ht["apple"] = 5
 	ht["banana"] = 3
 
-	// Test case 1: Delete an existing key
+	// Test case 1: Delete an existing key.
 	ht.Delete("apple")
 	if _, ok := ht["apple"]; ok {
-		t.Errorf("Expected key 'apple' to be deleted, but it still exists in the hashtable")
+		t.Fatalf("Expected key 'apple' to be deleted, but it still exists in the hashtable")
 	}
 
-	// Test case 2: Delete a non-existing key
+	// Test case 2: Delete a non-existing key.
 	ht.Delete("nonexistent")
 	if _, ok := ht["nonexistent"]; ok {
-		t.Errorf("Expected key 'nonexistent' to not exist, but it was found in the hashtable")
+		t.Fatalf("Expected key 'nonexistent' to not exist, but it was found in the hashtable")
 	}
 
-	// Test case 3: Delete a key after adding it again
+	// Test case 3: Delete a key after adding it again.
 	ht["apple"] = 10
 	ht.Delete("apple")
 	if _, ok := ht["apple"]; ok {
-		t.Errorf("Expected key 'apple' to be deleted, but it still exists in the hashtable")
+		t.Fatalf("Expected key 'apple' to be deleted, but it still exists in the hashtable")
 	}
 }
 
@@ -184,18 +186,18 @@ func TestDeleteFunc(t *testing.T) {
 	ht["orange"] = 7
 	ht["kiwi"] = 6
 
-	// Delete key-value pairs where the value is 7
+	// Delete key-value pairs where the value is 7.
 	ht.DeleteFunc(func(key string, value int) bool {
 		return value == 6
 	})
 
-	// Check if the key-value pair with key "kiwi" is removed
+	// Check if the key-value pair with key "kiwi" is removed.
 	_, exists := ht["kiwi"]
 	if exists {
 		t.Error("Expected key 'kiwi' to be removed, but it still exists.")
 	}
 
-	// Check if other key-value pairs are still present
+	// Check if other key-value pairs are still present.
 	_, exists = ht["apple"]
 	if !exists {
 		t.Error("Expected key 'apple' to be present, but it is not.")
@@ -214,25 +216,42 @@ func TestDeleteMany(t *testing.T) {
 	ht["orange"] = 7
 	ht["kiwi"] = 6
 
-	// Delete key-value pairs with keys "apple" and "kiwi"
+	// Delete key-value pairs with keys "apple" and "kiwi".
 	ht.DeleteMany("apple", "kiwi")
 
-	// Check if the key-value pair with key "apple" is removed
+	// Check if the key-value pair with key "apple" is removed.
 	_, exists := ht["apple"]
 	if exists {
 		t.Error("Expected key 'apple' to be removed, but it still exists.")
 	}
 
-	// Check if the key-value pair with key "kiwi" is removed
+	// Check if the key-value pair with key "kiwi" is removed.
 	_, exists = ht["kiwi"]
 	if exists {
 		t.Error("Expected key 'kiwi' to be removed, but it still exists.")
 	}
 
-	// Check if other key-value pairs are still present
+	// Check if other key-value pairs are still present.
 	_, exists = ht["orange"]
 	if !exists {
 		t.Error("Expected key 'orange' to be present, but it is not.")
+	}
+}
+
+func TestDeleteManyValues(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+	ht.Add("cherry", 8)
+
+	// Delete key-value pairs where the value is 3 or 8.
+	ht.DeleteManyValues(3, 8)
+
+	// Verify that the hashtable only contains the expected key-value pair.
+	expected := hashtable.Hashtable[string, int]{"apple": 5}
+	if !reflect.DeepEqual(ht, expected) {
+		t.Fatalf("Expected hashtable: %v, but got: %v", expected, ht)
 	}
 }
 
@@ -256,11 +275,11 @@ func TestEach(t *testing.T) {
 	printKeyValue := func(key string, value int) {
 		if expected, ok := expectedOutput[key]; ok {
 			if value != expected {
-				t.Errorf("Expected %s: %d, but got %d", key, expected, value)
+				t.Fatalf("Expected %s: %d, but got %d", key, expected, value)
 			}
 			delete(expectedOutput, key)
 		} else {
-			t.Errorf("Unexpected key: %s", key)
+			t.Fatalf("Unexpected key: %s", key)
 		}
 	}
 
@@ -269,7 +288,7 @@ func TestEach(t *testing.T) {
 
 	// Check if all expected keys have been processed.
 	if len(expectedOutput) > 0 {
-		t.Errorf("Not all keys were processed: %v", expectedOutput)
+		t.Fatalf("Not all keys were processed: %v", expectedOutput)
 	}
 }
 
@@ -292,7 +311,7 @@ func TestEachBreak(t *testing.T) {
 
 	// Ensure that iteration stopped at "banana".
 	if stopPrinting != "banana" {
-		t.Errorf("Iteration did not stop at 'banana'.")
+		t.Fatalf("Iteration did not stop at 'banana'.")
 	}
 }
 
@@ -321,7 +340,7 @@ func TestEachKey(t *testing.T) {
 	expectedKeys := []string{"apple", "banana", "cherry"}
 	for i, key := range printedKeys {
 		if key != expectedKeys[i] {
-			t.Errorf("Expected key %s at index %d, but got %s", expectedKeys[i], i, key)
+			t.Fatalf("Expected key %s at index %d, but got %s", expectedKeys[i], i, key)
 		}
 	}
 }
@@ -348,11 +367,11 @@ func TestEachKeyBreak(t *testing.T) {
 	// Sort the printed values for consistent comparison.
 	sort.Strings(printedKeys)
 
-	// Expected output: "apple", "banana"
+	// Expected output: "apple", "banana".
 	expectedKeys := []string{"apple", "banana"}
 	for i, key := range printedKeys {
 		if key != expectedKeys[i] {
-			t.Errorf("Expected key %s at index %d, but got %s", expectedKeys[i], i, key)
+			t.Fatalf("Expected key %s at index %d, but got %s", expectedKeys[i], i, key)
 		}
 	}
 }
@@ -383,13 +402,13 @@ func TestEachValue(t *testing.T) {
 	expectedValues := []int{3, 5, 8}
 
 	if len(printedValues) != len(expectedValues) {
-		t.Errorf("Expected %d values, but got %d", len(expectedValues), len(printedValues))
+		t.Fatalf("Expected %d values, but got %d", len(expectedValues), len(printedValues))
 		return
 	}
 
 	for i, value := range printedValues {
 		if value != expectedValues[i] {
-			t.Errorf("Expected value %d at index %d, but got %d", expectedValues[i], i, value)
+			t.Fatalf("Expected value %d at index %d, but got %d", expectedValues[i], i, value)
 		}
 	}
 }
@@ -427,11 +446,11 @@ func TestEachValueBreak(t *testing.T) {
 		}
 	}
 
-	// Expected output: 5, 3
+	// Expected output: 5, 3.
 	expectedValues := []int{5, 3}
 	for i, value := range processedValues {
 		if value != expectedValues[i] {
-			t.Errorf("Expected value %d at index %d, but got %d", expectedValues[i], i, value)
+			t.Fatalf("Expected value %d at index %d, but got %d", expectedValues[i], i, value)
 		}
 	}
 }
@@ -443,39 +462,88 @@ func TestGet(t *testing.T) {
 	ht["apple"] = 5
 	ht["banana"] = 3
 
-	// Test case 1: Get an existing key
+	// Test case 1: Get an existing key.
 	value, exists := ht.Get("apple")
 	if !exists {
-		t.Errorf("Expected key 'apple' to exist, but it was not found in the hashtable")
+		t.Fatalf("Expected key 'apple' to exist, but it was not found in the hashtable")
 	}
 	if value != 5 {
-		t.Errorf("Expected value for key 'apple' to be 5, but got %d", value)
+		t.Fatalf("Expected value for key 'apple' to be 5, but got %d", value)
 	}
 
-	// Test case 2: Get a non-existing key
+	// Test case 2: Get a non-existing key.
 	value, exists = ht.Get("orange")
 	if exists {
-		t.Errorf("Expected key 'orange' to not exist, but it was found in the hashtable with value %d", value)
+		t.Fatalf("Expected key 'orange' to not exist, but it was found in the hashtable with value %d", value)
 	}
 	if value != 0 {
-		t.Errorf("Expected default value for non-existing key 'orange' to be 0, but got %d", value)
+		t.Fatalf("Expected default value for non-existing key 'orange' to be 0, but got %d", value)
 	}
 }
 
-// TestHas tests Hashtable.Has
+// TestGetMany tests Hashtable.GetMany.
+func TestGetMany(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Get values for specific keys.
+	values := ht.GetMany("apple", "banana", "orange")
+
+	// Sort the keys for consistent iteration order.
+	sort.Ints(*values)
+
+	// The expected values slice: {5, 3}.
+	expectedValues := &slice.Slice[int]{5, 3}
+
+	// Sort the keys for consistent iteration order.
+	sort.Ints(*expectedValues)
+
+	// Verify that the obtained values match the expected values.
+	if values == expectedValues {
+		t.Fatalf("Expected values: %v, but got: %v", expectedValues, values)
+	}
+}
+
+// TestHas tests Hashtable.Has.
 
 func TestHas(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
 	ht["apple"] = 5
 	ht["banana"] = 3
 
-	// Test case 1: Key exists in the hashtable
+	// Test case 1: Key exists in the hashtable.
 	if !ht.Has("apple") {
-		t.Errorf("Expected key 'apple' to exist, but it was not found in the hashtable")
+		t.Fatalf("Expected key 'apple' to exist, but it was not found in the hashtable")
 	}
 
-	// Test case 2: Key does not exist in the hashtable
+	// Test case 2: Key does not exist in the hashtable.
 	if ht.Has("orange") {
-		t.Errorf("Expected key 'orange' to not exist, but it was found in the hashtable")
+		t.Fatalf("Expected key 'orange' to not exist, but it was found in the hashtable")
+	}
+}
+
+// TestHasMany test Hashtable.HasMany.
+func TestHasMany(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+	ht.Add("cherry", 8)
+
+	// Keys to check existence.
+	keysToCheck := []string{"apple", "orange", "banana"}
+
+	// Check the existence of multiple keys.
+	results := ht.HasMany(keysToCheck...)
+
+	// The expected boolean slice: {true, false, true}
+	expectedResults := &slice.Slice[bool]{true, false, true}
+
+	// Verify that the obtained results match the expected results.
+	if !reflect.DeepEqual(results, expectedResults) {
+		t.Fatalf("Expected results: %v, but got: %v", expectedResults, results)
 	}
 }
