@@ -322,6 +322,7 @@ func TestEachKey(t *testing.T) {
 	}
 }
 
+// TestEachKeyBreak tests Hashtable.EachKeyBreak.
 func TestEachKeyBreak(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
 
