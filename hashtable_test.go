@@ -184,9 +184,9 @@ func TestDeleteFunc(t *testing.T) {
 	ht["orange"] = 7
 	ht["kiwi"] = 6
 
-	// Delete key-value pairs where the value is less than 7
+	// Delete key-value pairs where the value is 7
 	ht.DeleteFunc(func(key string, value int) bool {
-		return value < 7
+		return value == 6
 	})
 
 	// Check if the key-value pair with key "kiwi" is removed
