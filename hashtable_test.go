@@ -576,6 +576,7 @@ func TestKeys(t *testing.T) {
 	}
 }
 
+// TestKeysFunc tests Hashtable.KeysFunc.
 func TestKeysFunc(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -594,5 +595,25 @@ func TestKeysFunc(t *testing.T) {
 	// Verify that the obtained keys match the expected keys.
 	if !reflect.DeepEqual(keys, expectedKeys) {
 		t.Errorf("Expected keys: %v, but got: %v", expectedKeys, keys)
+	}
+}
+
+// TestLength tests Hashtable.Length.
+func TestLength(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Get the length of the hashtable.
+	length := ht.Length()
+
+	// Expected length: 3
+	expectedLength := 3
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
 	}
 }
