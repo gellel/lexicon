@@ -397,3 +397,47 @@ func (hashtable *Hashtable[K, V]) HasMany(keys ...K) *slice.Slice[bool] {
 	}
 	return &values
 }
+
+// Keys returns a slice containing all the keys present in the hashtable.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	ht.Add("cherry", 8)
+//
+//	// Get all keys from the hashtable.
+//	keys := ht.Keys() // Result: {"apple", "banana", "cherry"}
+func (hashtable *Hashtable[K, V]) Keys() *slice.Slice[K] {
+	keys := make(slice.Slice[K], 0)
+	hashtable.EachKey(func(key K) {
+		keys.Append(key)
+	})
+	return &keys
+}
+
+// KeysFunc returns a slice containing the keys from the hashtable for which the provided function returns true.
+// The provided function `fn` should accept a key of type `K` and return a boolean value.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	ht.Add("cherry", 8)
+//
+//	// Get keys from the hashtable where the key length is greater than 5.
+//	keys := ht.KeysFunc(func(key string) bool {
+//	    return len(key) > 5
+//	})
+//	// Result: {"banana"}
+func (hashtable *Hashtable[K, V]) KeysFunc(fn func(key K) bool) *slice.Slice[K] {
+	keys := make(slice.Slice[K], 0)
+	hashtable.EachKey(func(key K) {
+		if fn(key) {
+			keys.Append(key)
+		}
+	})
+	return &keys
+}
