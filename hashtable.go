@@ -230,6 +230,52 @@ func (hashtable *Hashtable[K, V]) EachKeyBreak(fn func(key K) bool) *Hashtable[K
 	})
 }
 
+// EachValue iterates over the values in the hashtable and applies a function to each value.
+//
+// Example:
+//   ht := make(hashtable.Hashtable[string, int])
+//   ht.Add("apple", 5)
+//   ht.Add("banana", 3)
+//   ht.Add("cherry", 8)
+//
+//   // Function to print each value.
+//   printValue := func(value int) {
+//       fmt.Println(value)
+//   }
+//
+//   // Iterate over the hashtable values and print them.
+//   ht.EachValue(printValue)
+//   // Output: 5, 3, 8
+func (hashtable *Hashtable[K, V]) EachValue(fn func(value V)) *Hashtable[K, V] {
+	return hashtable.Each(func(_ K, value V) {
+		fn(value)
+	})
+}
+
+// EachValueBreak iterates over the values in the hashtable and applies a function to each value until the function returns false.
+// If the provided function returns false, the iteration breaks early.
+//
+// Example:
+//   ht := make(hashtable.Hashtable[string, int])
+//   ht.Add("apple", 5)
+//   ht.Add("banana", 3)
+//   ht.Add("cherry", 8)
+//
+//   // Function to process each value. Returns false to break the iteration if the value is 3.
+//   processValue := func(value int) bool {
+//       fmt.Println(value)
+//       return value != 3
+//   }
+//
+//   // Iterate over the hashtable values and process them until the value is 3.
+//   ht.EachValueBreak(processValue)
+//   // Output: 5, 3
+func (hashtable *Hashtable[K, V]) EachValueBreak(fn func(value V) bool) *Hashtable[K, V] {
+	return hashtable.EachBreak(func(_ K, value V) bool {
+		return fn(value)
+	})
+}
+
 // Get retrieves the value associated with the provided key from the hashtable.
 // If the key exists, it returns the associated value and true. Otherwise, it returns the zero value for the value type and false.
 //

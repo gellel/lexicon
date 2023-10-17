@@ -1,6 +1,7 @@
 package hashtable_test
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/lindsaygelle/hashtable"
@@ -313,6 +314,9 @@ func TestEachKey(t *testing.T) {
 	// Iterate over the keys and print each key.
 	ht.EachKey(printKey)
 
+	// Sort the printed values for consistent comparison.
+	sort.Strings(printedKeys)
+
 	// Expected output: "apple", "banana", "cherry"
 	expectedKeys := []string{"apple", "banana", "cherry"}
 	for i, key := range printedKeys {
@@ -341,11 +345,93 @@ func TestEachKeyBreak(t *testing.T) {
 	// Iterate over the keys and print each key, breaking if the key is "banana".
 	ht.EachKeyBreak(printAndBreak)
 
+	// Sort the printed values for consistent comparison.
+	sort.Strings(printedKeys)
+
 	// Expected output: "apple", "banana"
 	expectedKeys := []string{"apple", "banana"}
 	for i, key := range printedKeys {
 		if key != expectedKeys[i] {
 			t.Errorf("Expected key %s at index %d, but got %s", expectedKeys[i], i, key)
+		}
+	}
+}
+
+// TestEachValue tests Hashtable.EachValue.
+func TestEachValue(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Define a function to print each value.
+	var printedValues []int
+	printValue := func(value int) {
+		printedValues = append(printedValues, value)
+	}
+
+	// Iterate over the hashtable values and print them.
+	ht.EachValue(printValue)
+
+	// Sort the printed values for consistent comparison.
+	sort.Ints(printedValues)
+
+	// Expected output: 3, 5, 8
+	expectedValues := []int{3, 5, 8}
+
+	if len(printedValues) != len(expectedValues) {
+		t.Errorf("Expected %d values, but got %d", len(expectedValues), len(printedValues))
+		return
+	}
+
+	for i, value := range printedValues {
+		if value != expectedValues[i] {
+			t.Errorf("Expected value %d at index %d, but got %d", expectedValues[i], i, value)
+		}
+	}
+}
+
+// TestEachValueBreak tests Hashtable.EachValueBreak.
+
+func TestEachValueBreak(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+	ht.Add("cherry", 8)
+
+	// Sort the keys for consistent iteration order.
+	keys := make([]string, 0, len(ht))
+	for key := range ht {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	// Define a function to process each value. It returns false to break the iteration if the value is 3.
+	var processedValues []int
+	processValue := func(value int) bool {
+		processedValues = append(processedValues, value)
+		return value != 3
+	}
+
+	// Iterate over the hashtable values and process them until the value is 3.
+	for _, key := range keys {
+		value, _ := ht.Get(key)
+		if !processValue(value) {
+			break
+		}
+	}
+
+	// Expected output: 5, 3
+	expectedValues := []int{5, 3}
+	for i, value := range processedValues {
+		if value != expectedValues[i] {
+			t.Errorf("Expected value %d at index %d, but got %d", expectedValues[i], i, value)
 		}
 	}
 }
