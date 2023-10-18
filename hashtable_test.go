@@ -429,23 +429,14 @@ func TestEachKeyBreak(t *testing.T) {
 	ht["banana"] = 3
 	ht["cherry"] = 8
 
-	// Define a function to print each key and break if the key is "banana".
-	var printedKeys []string
-	printAndBreak := func(key string) bool {
-		printedKeys = append(printedKeys, key)
-		return key == "banana"
-	}
+	var keyToBreak string
+	ht.EachBreak(func(key string, value int) bool {
+		keyToBreak = key
+		return key != "banana"
+	})
 
-	// Iterate over the keys and print each key, breaking if the key is "banana".
-	ht.EachKeyBreak(printAndBreak)
-
-	// Sort the printed values for consistent comparison.
-	sort.Strings(printedKeys)
-
-	for i, key := range printedKeys {
-		if key == "banana" {
-			t.Fatalf("Unexpected value %d at index %s", i, key)
-		}
+	if keyToBreak != "banana" {
+		t.Fatalf("Expect keyToBreak to equal 'banana', but got %s", keyToBreak)
 	}
 }
 
