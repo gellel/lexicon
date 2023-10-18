@@ -257,7 +257,7 @@ func (hashtable *Hashtable[K, V]) DeleteManyValues(values ...V) *Hashtable[K, V]
 //	ht.Add("banana", 3)
 //	deleted := ht.DeleteOK("apple") // true, "apple" key is successfully deleted
 //	notDeleted := ht.DeleteOK("grape") // true, "grape" key does not exist, deletion is considered successful
-func (hashtable Hashtable[K, V]) DeleteOK(key K) bool {
+func (hashtable *Hashtable[K, V]) DeleteOK(key K) bool {
 	return !hashtable.Delete(key).Has(key)
 }
 
