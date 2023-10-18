@@ -148,6 +148,20 @@ func (hashtable *Hashtable[K, V]) DeleteFunc(fn func(key K, value V) bool) *Hash
 	return hashtable
 }
 
+// DeleteLength deletes a key from the hashtable and returns the new length of the hashtable.
+// If the key does not exist, the length remains unchanged.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	length := ht.DeleteLength("apple") // length is 1 (key "apple" is deleted)
+//	length = ht.DeleteLength("grape")   // length remains 1 (key "grape" does not exist)
+func (hashtable *Hashtable[K, V]) DeleteLength(key K) int {
+	return hashtable.Delete(key).Length()
+}
+
 // DeleteMany removes multiple key-value pairs from the hashtable based on the provided keys.
 // If a key doesn't exist in the hashtable, it is ignored.
 //

@@ -98,7 +98,7 @@ func TestAddLength(t *testing.T) {
 
 	// Verify that the obtained length matches the expected length.
 	if length != expectedLength {
-		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
 	}
 
 	// Add another key-value pair and get the updated length.
@@ -109,7 +109,7 @@ func TestAddLength(t *testing.T) {
 
 	// Verify that the obtained length matches the expected length.
 	if length != expectedLength {
-		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
 	}
 
 	// Update an existing key-value pair and get the same length.
@@ -121,7 +121,7 @@ func TestAddLength(t *testing.T) {
 
 	// Verify that the obtained length matches the expected length.
 	if length != expectedLength {
-		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
 	}
 }
 
@@ -247,6 +247,40 @@ func TestDeleteFunc(t *testing.T) {
 	_, exists = ht["orange"]
 	if !exists {
 		t.Error("Expected key 'orange' to be present, but it is not.")
+	}
+}
+
+// TestDeleteLength tests Hashtable.DeleteLength.
+func TestDeleteLength(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable and get the initial length.
+	ht["apple"] = 5
+	ht["banana"] = 3
+	initialLength := len(ht)
+
+	// Delete an existing key from the hashtable and get the updated length.
+	lengthAfterDelete := ht.DeleteLength("apple")
+
+	// Expected length after deleting "apple": initial length - 1
+	expectedLength := initialLength - 1
+
+	// Verify that the obtained length matches the expected length.
+	if lengthAfterDelete != expectedLength {
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, lengthAfterDelete)
+	}
+
+	// Attempt to delete a non-existing key from the hashtable.
+	lengthAfterNonExistingDelete := ht.DeleteLength("grape")
+
+	// Length should remain the same after attempting to delete a non-existing key.
+	// Expected length: initial length
+	expectedLengthNonExisting := len(ht)
+
+	// Verify that the obtained length matches the expected length.
+	if lengthAfterNonExistingDelete != expectedLengthNonExisting {
+		t.Fatalf("Expected length: %d, but got: %d", expectedLengthNonExisting, lengthAfterNonExistingDelete)
 	}
 }
 
@@ -610,7 +644,7 @@ func TestKeys(t *testing.T) {
 
 	// Verify that the obtained keys match the expected keys.
 	if !reflect.DeepEqual(keys, expectedKeys) {
-		t.Errorf("Expected keys: %v, but got: %v", expectedKeys, keys)
+		t.Fatalf("Expected keys: %v, but got: %v", expectedKeys, keys)
 	}
 }
 
@@ -631,7 +665,7 @@ func TestKeysFunc(t *testing.T) {
 
 	// Verify that the obtained keys match the expected keys.
 	if !reflect.DeepEqual(keys, expectedKeys) {
-		t.Errorf("Expected keys: %v, but got: %v", expectedKeys, keys)
+		t.Fatalf("Expected keys: %v, but got: %v", expectedKeys, keys)
 	}
 }
 
@@ -650,6 +684,6 @@ func TestLength(t *testing.T) {
 
 	// Verify that the obtained length matches the expected length.
 	if length != expectedLength {
-		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
 	}
 }
