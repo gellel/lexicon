@@ -153,6 +153,42 @@ func TestAddMany(t *testing.T) {
 	}
 }
 
+// TestAddManyOK tests Hashtable.AddManyOK.
+func TestAddManyOK(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Attempt to add multiple key-value pairs and get the results indicating success.
+	results := ht.AddManyOK(
+		map[string]int{"apple": 5, "banana": 3, "cherry": 8},
+	)
+
+	// Expected results: [true, true, true] indicating successful insertions for "apple", "banana" and "cherry".
+	expectedResults := []bool{true, true, true}
+
+	// Verify that the obtained results match the expected results.
+	for i, result := range *results {
+		if result != expectedResults[i] {
+			t.Errorf("Expected result: %v, but got: %v", expectedResults[i], result)
+		}
+	}
+
+	// Attempt to add multiple key-value pairs and get the results indicating success.
+	results = ht.AddManyOK(
+		map[string]int{"apple": 5, "banana": 3, "cherry": 8},
+	)
+
+	// Expected results: [false, false, false] indicating unsuccessful insertions for "apple", "banana" and "cherry" due to existing key.
+	expectedResults = []bool{false, false, false}
+
+	// Verify that the obtained results match the expected results.
+	for i, result := range *results {
+		if result != expectedResults[i] {
+			t.Errorf("Expected result: %v, but got: %v", expectedResults[i], result)
+		}
+	}
+}
+
 // TestAddOK tests Hashtable.AddOK.
 func TestAddOK(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
@@ -313,6 +349,7 @@ func TestDeleteMany(t *testing.T) {
 	}
 }
 
+// TestDeleteManyValues tests Hashtable.DeleteManyValues.
 func TestDeleteManyValues(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -327,6 +364,59 @@ func TestDeleteManyValues(t *testing.T) {
 	expected := hashtable.Hashtable[string, int]{"apple": 5}
 	if !reflect.DeepEqual(ht, expected) {
 		t.Fatalf("Expected hashtable: %v, but got: %v", expected, ht)
+	}
+}
+
+// TestDeleteManyOK tests Hashtable.DeleteManyOK.
+func TestDeleteManyOK(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+
+	// Specify keys to delete.
+	keysToDelete := []string{"apple", "grape"}
+
+	// Attempt to delete keys and check if deletion is successful.
+	results := ht.DeleteManyOK(keysToDelete...)
+
+	expectedResults := []bool{true, true} // Expected results for "apple" (exists) and "grape" (does not exist)
+
+	// Check if results match the expected results.
+	for i, result := range *results {
+		if result != expectedResults[i] {
+			t.Errorf("Expected deletion of key %s to be %v but got %v", keysToDelete[i], expectedResults[i], result)
+		}
+	}
+}
+
+// TestDeleteOK tests Hashtable.DeleteOK.
+func TestDeleteOK(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+
+	// Delete keys and check if deletion is successful.
+	deleted := ht.DeleteOK("apple")
+	if !deleted {
+		t.Errorf("Expected deletion of 'apple' to be successful")
+	}
+
+	// Attempt to delete a key that does not exist.
+	notDeleted := ht.DeleteOK("grape")
+	if !notDeleted {
+		t.Errorf("Expected deletion of 'grape' to be successful because the key does not exist")
+	}
+
+	// Attempt to delete a key that has already been deleted.
+	alreadyDeleted := ht.DeleteOK("apple")
+	if !alreadyDeleted {
+		t.Errorf("Expected deletion of 'apple' to be successful even though it was already deleted")
 	}
 }
 
