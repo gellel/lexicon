@@ -85,6 +85,46 @@ func TestAddFunc(t *testing.T) {
 	}
 }
 
+// TestAddLength tests Hashtable.AddLength.
+func TestAddLength(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable and get the length.
+	length := ht.AddLength("apple", 5)
+
+	// Expected length after adding the first key-value pair: 1
+	expectedLength := 1
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+
+	// Add another key-value pair and get the updated length.
+	length = ht.AddLength("banana", 3)
+
+	// Expected length after adding the second key-value pair: 2
+	expectedLength = 2
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+
+	// Update an existing key-value pair and get the same length.
+	length = ht.AddLength("apple", 10)
+
+	// Length should remain 2 after updating the existing key "apple".
+	// Expected length: 2
+	expectedLength = 2
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+}
+
 // TestAddMany tests Hashtable.AddMany.
 
 func TestAddMany(t *testing.T) {
@@ -207,6 +247,40 @@ func TestDeleteFunc(t *testing.T) {
 	_, exists = ht["orange"]
 	if !exists {
 		t.Error("Expected key 'orange' to be present, but it is not.")
+	}
+}
+
+// TestDeleteLength tests Hashtable.DeleteLength.
+func TestDeleteLength(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable and get the initial length.
+	ht["apple"] = 5
+	ht["banana"] = 3
+	initialLength := len(ht)
+
+	// Delete an existing key from the hashtable and get the updated length.
+	lengthAfterDelete := ht.DeleteLength("apple")
+
+	// Expected length after deleting "apple": initial length - 1
+	expectedLength := initialLength - 1
+
+	// Verify that the obtained length matches the expected length.
+	if lengthAfterDelete != expectedLength {
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, lengthAfterDelete)
+	}
+
+	// Attempt to delete a non-existing key from the hashtable.
+	lengthAfterNonExistingDelete := ht.DeleteLength("grape")
+
+	// Length should remain the same after attempting to delete a non-existing key.
+	// Expected length: initial length
+	expectedLengthNonExisting := len(ht)
+
+	// Verify that the obtained length matches the expected length.
+	if lengthAfterNonExistingDelete != expectedLengthNonExisting {
+		t.Fatalf("Expected length: %d, but got: %d", expectedLengthNonExisting, lengthAfterNonExistingDelete)
 	}
 }
 
@@ -355,25 +429,14 @@ func TestEachKeyBreak(t *testing.T) {
 	ht["banana"] = 3
 	ht["cherry"] = 8
 
-	// Define a function to print each key and break if the key is "banana".
-	var printedKeys []string
-	printAndBreak := func(key string) bool {
-		printedKeys = append(printedKeys, key)
+	var keyToBreak string
+	ht.EachBreak(func(key string, value int) bool {
+		keyToBreak = key
 		return key != "banana"
-	}
+	})
 
-	// Iterate over the keys and print each key, breaking if the key is "banana".
-	ht.EachKeyBreak(printAndBreak)
-
-	// Sort the printed values for consistent comparison.
-	sort.Strings(printedKeys)
-
-	// Expected output: "apple", "banana".
-	expectedKeys := []string{"apple", "banana"}
-	for i, key := range printedKeys {
-		if key != expectedKeys[i] {
-			t.Fatalf("Expected key %s at index %d, but got %s", expectedKeys[i], i, key)
-		}
+	if keyToBreak != "banana" {
+		t.Fatalf("Expect keyToBreak to equal 'banana', but got %s", keyToBreak)
 	}
 }
 
@@ -572,11 +635,10 @@ func TestKeys(t *testing.T) {
 
 	// Verify that the obtained keys match the expected keys.
 	if !reflect.DeepEqual(keys, expectedKeys) {
-		t.Errorf("Expected keys: %v, but got: %v", expectedKeys, keys)
+		t.Fatalf("Expected keys: %v, but got: %v", expectedKeys, keys)
 	}
 }
 
-// TestKeysFunc tests Hashtable.KeysFunc.
 func TestKeysFunc(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -594,11 +656,10 @@ func TestKeysFunc(t *testing.T) {
 
 	// Verify that the obtained keys match the expected keys.
 	if !reflect.DeepEqual(keys, expectedKeys) {
-		t.Errorf("Expected keys: %v, but got: %v", expectedKeys, keys)
+		t.Fatalf("Expected keys: %v, but got: %v", expectedKeys, keys)
 	}
 }
 
-// TestLength tests Hashtable.Length.
 func TestLength(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -614,6 +675,6 @@ func TestLength(t *testing.T) {
 
 	// Verify that the obtained length matches the expected length.
 	if length != expectedLength {
-		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
 	}
 }
