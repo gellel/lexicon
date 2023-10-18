@@ -3,6 +3,7 @@ package hashtable_test
 import (
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/lindsaygelle/hashtable"
@@ -424,11 +425,12 @@ func TestEachValueBreak(t *testing.T) {
 	ht.Add("banana", 3)
 	ht.Add("cherry", 8)
 
-	// Sort the keys for consistent iteration order.
 	keys := make([]string, 0, len(ht))
 	for key := range ht {
 		keys = append(keys, key)
 	}
+
+	// Sort the keys for consistent iteration order.
 	sort.Strings(keys)
 
 	// Define a function to process each value. It returns false to break the iteration if the value is 3.
@@ -529,9 +531,9 @@ func TestHas(t *testing.T) {
 func TestHasMany(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
-	ht.Add("apple", 5)
-	ht.Add("banana", 3)
-	ht.Add("cherry", 8)
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
 
 	// Keys to check existence.
 	keysToCheck := []string{"apple", "orange", "banana"}
@@ -545,5 +547,73 @@ func TestHasMany(t *testing.T) {
 	// Verify that the obtained results match the expected results.
 	if !reflect.DeepEqual(results, expectedResults) {
 		t.Fatalf("Expected results: %v, but got: %v", expectedResults, results)
+	}
+}
+
+// TestKeys tests Hashtable.Keys.
+func TestKeys(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Get all keys from the hashtable.
+	keys := ht.Keys()
+
+	// Sort the keys for consistent iteration order.
+	sort.Strings(*keys)
+
+	// The expected keys slice: {"apple", "banana", "cherry"}
+	expectedKeys := &slice.Slice[string]{"apple", "banana", "cherry"}
+
+	// Sort the keys for consistent iteration order.
+	sort.Strings(*expectedKeys)
+
+	// Verify that the obtained keys match the expected keys.
+	if !reflect.DeepEqual(keys, expectedKeys) {
+		t.Errorf("Expected keys: %v, but got: %v", expectedKeys, keys)
+	}
+}
+
+// TestKeysFunc tests Hashtable.KeysFunc.
+func TestKeysFunc(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Get keys from the hashtable where the key length is greater than 5.
+	keys := ht.KeysFunc(func(key string) bool {
+		return strings.HasPrefix(key, "b")
+	})
+
+	// The expected keys slice: {"banana"}
+	expectedKeys := &slice.Slice[string]{"banana"}
+
+	// Verify that the obtained keys match the expected keys.
+	if !reflect.DeepEqual(keys, expectedKeys) {
+		t.Errorf("Expected keys: %v, but got: %v", expectedKeys, keys)
+	}
+}
+
+// TestLength tests Hashtable.Length.
+func TestLength(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Get the length of the hashtable.
+	length := ht.Length()
+
+	// Expected length: 3
+	expectedLength := 3
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
 	}
 }

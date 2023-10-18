@@ -397,3 +397,86 @@ func (hashtable *Hashtable[K, V]) HasMany(keys ...K) *slice.Slice[bool] {
 	}
 	return &values
 }
+
+// Keys returns a slice containing all the keys present in the hashtable.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	ht.Add("cherry", 8)
+//
+//	// Get all keys from the hashtable.
+//	keys := ht.Keys() // Result: {"apple", "banana", "cherry"}
+func (hashtable *Hashtable[K, V]) Keys() *slice.Slice[K] {
+	keys := make(slice.Slice[K], 0)
+	hashtable.EachKey(func(key K) {
+		keys.Append(key)
+	})
+	return &keys
+}
+
+// KeysFunc returns a slice containing the keys from the hashtable for which the provided function returns true.
+// The provided function `fn` should accept a key of type `K` and return a boolean value.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	ht.Add("cherry", 8)
+//
+//	// Get keys from the hashtable where the key length is greater than 5.
+//	keys := ht.KeysFunc(func(key string) bool {
+//	    return len(key) > 5
+//	})
+//	// Result: {"banana"}
+func (hashtable *Hashtable[K, V]) KeysFunc(fn func(key K) bool) *slice.Slice[K] {
+	keys := make(slice.Slice[K], 0)
+	hashtable.EachKey(func(key K) {
+		if fn(key) {
+			keys.Append(key)
+		}
+	})
+	return &keys
+}
+
+// Length returns the number of key-value pairs in the hashtable.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	ht.Add("cherry", 8)
+//
+//	length := ht.Length() // Result: 3
+func (hashtable *Hashtable[K, V]) Length() int {
+	return len(*hashtable)
+}
+
+// Map applies a given function to all key-value pairs in the hashtable and returns a new hashtable with the transformed values.
+// The original hashtable remains unchanged.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	ht.Add("cherry", 8)
+//
+//	// Define a function to double the values.
+//	doubleValue := func(key string, value int) int {
+//	    return value * 2
+//	}
+//
+//	// Apply the function to double the values in the hashtable.
+//	doubledHT := ht.Map(doubleValue)
+//	// doubledHT contains: {"apple": 10, "banana": 6, "cherry": 16}
+func (hashtable *Hashtable[K, V]) Map(fn func(key K, value V) V) *Hashtable[K, V] {
+	for key, value := range *hashtable {
+		hashtable.Add(key, fn(key, value))
+	}
+	return hashtable
+}
