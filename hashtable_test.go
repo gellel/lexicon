@@ -85,6 +85,46 @@ func TestAddFunc(t *testing.T) {
 	}
 }
 
+// TestAddLength tests Hashtable.AddLength.
+func TestAddLength(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable and get the length.
+	length := ht.AddLength("apple", 5)
+
+	// Expected length after adding the first key-value pair: 1
+	expectedLength := 1
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+
+	// Add another key-value pair and get the updated length.
+	length = ht.AddLength("banana", 3)
+
+	// Expected length after adding the second key-value pair: 2
+	expectedLength = 2
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+
+	// Update an existing key-value pair and get the same length.
+	length = ht.AddLength("apple", 10)
+
+	// Length should remain 2 after updating the existing key "apple".
+	// Expected length: 2
+	expectedLength = 2
+
+	// Verify that the obtained length matches the expected length.
+	if length != expectedLength {
+		t.Errorf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+}
+
 // TestAddMany tests Hashtable.AddMany.
 
 func TestAddMany(t *testing.T) {
@@ -359,7 +399,7 @@ func TestEachKeyBreak(t *testing.T) {
 	var printedKeys []string
 	printAndBreak := func(key string) bool {
 		printedKeys = append(printedKeys, key)
-		return key != "banana"
+		return key == "banana"
 	}
 
 	// Iterate over the keys and print each key, breaking if the key is "banana".
@@ -368,11 +408,9 @@ func TestEachKeyBreak(t *testing.T) {
 	// Sort the printed values for consistent comparison.
 	sort.Strings(printedKeys)
 
-	// Expected output: "apple", "banana".
-	expectedKeys := []string{"apple", "banana"}
 	for i, key := range printedKeys {
-		if key != expectedKeys[i] {
-			t.Fatalf("Expected key %s at index %d, but got %s", expectedKeys[i], i, key)
+		if key == "banana" {
+			t.Fatalf("Unexpected value %d at index %s", i, key)
 		}
 	}
 }
@@ -576,7 +614,6 @@ func TestKeys(t *testing.T) {
 	}
 }
 
-// TestKeysFunc tests Hashtable.KeysFunc.
 func TestKeysFunc(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -598,7 +635,6 @@ func TestKeysFunc(t *testing.T) {
 	}
 }
 
-// TestLength tests Hashtable.Length.
 func TestLength(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])

@@ -63,6 +63,19 @@ func (hashtable *Hashtable[K, V]) AddFunc(values []map[K]V, fn func(key K, value
 	return hashtable
 }
 
+// AddLength inserts a key-value pair into the hashtable and returns the new length of the hashtable.
+// If the key already exists, its associated value is updated.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	length := ht.AddLength("apple", 5) // length is 1
+//	length = ht.AddLength("banana", 3)  // length is 2
+//	length = ht.AddLength("apple", 10)  // length remains 2 (key "apple" is updated)
+func (hashtable *Hashtable[K, V]) AddLength(key K, value V) int {
+	return hashtable.Add(key, value).Length()
+}
+
 // AddMany inserts multiple key-value pairs into the hashtable from the provided maps.
 // If keys already exist, their associated values are updated.
 //
@@ -477,6 +490,17 @@ func (hashtable *Hashtable[K, V]) Length() int {
 func (hashtable *Hashtable[K, V]) Map(fn func(key K, value V) V) *Hashtable[K, V] {
 	for key, value := range *hashtable {
 		hashtable.Add(key, fn(key, value))
+	}
+	return hashtable
+}
+
+func (hashtable *Hashtable[K, V]) MapBreak(fn func(key K, value V) (V, bool)) *Hashtable[K, V] {
+	for key, value := range *hashtable {
+		value, ok := fn(key, value)
+		if !ok {
+			break
+		}
+		hashtable.Add(key, value)
 	}
 	return hashtable
 }
