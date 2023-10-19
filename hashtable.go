@@ -204,7 +204,7 @@ func (hashtable *Hashtable[K, V]) DeleteMany(keys ...K) *Hashtable[K, V] {
 
 // DeleteManyOK deletes multiple keys from the hashtable and returns a slice of booleans indicating whether each deletion was successful.
 // For each specified key, it checks if the key exists in the hashtable before attempting deletion. If the key does not exist,
-// the deletion is considered successful for that key, and true is appended to the returned slice. If the key exists and is successfully
+// the deletion is considered unsuccessful for that key, and false is appended to the returned slice. If the key exists and is successfully
 // deleted, true is appended; otherwise, false is appended.
 //
 // Example:
@@ -540,38 +540,51 @@ func (hashtable *Hashtable[K, V]) Length() int {
 	return len(*hashtable)
 }
 
-// Map applies a given function to all key-value pairs in the hashtable and returns a new hashtable with the transformed values.
-// The original hashtable remains unchanged.
+// Map iterates over the key-value pairs in the hashtable and applies the provided function to each pair.
+// The function can modify the value. The modified key-value pairs are updated in the same hashtable.
 //
 // Example:
 //
 //	ht := make(hashtable.Hashtable[string, int])
 //	ht.Add("apple", 5)
 //	ht.Add("banana", 3)
-//	ht.Add("cherry", 8)
-//
-//	// Define a function to double the values.
-//	doubleValue := func(key string, value int) int {
-//	    return value * 2
-//	}
-//
-//	// Apply the function to double the values in the hashtable.
-//	doubledHT := ht.Map(doubleValue)
-//	// doubledHT contains: {"apple": 10, "banana": 6, "cherry": 16}
+//	ht.Map(func(key string, value int) int {
+//	    if key == "banana" {
+//	        return value * 2 // Modify the value for the "banana" key
+//	    }
+//	    return value // Leave other values unchanged
+//	})
+//	// ht: {"apple": 5, "banana": 6}
 func (hashtable *Hashtable[K, V]) Map(fn func(key K, value V) V) *Hashtable[K, V] {
-	for key, value := range *hashtable {
-		hashtable.Add(key, fn(key, value))
-	}
-	return hashtable
+	return hashtable.MapBreak(func(key K, value V) (V, bool) {
+		return fn(key, value), true
+	})
 }
 
+// MapBreak iterates over the key-value pairs in the hashtable and applies the provided function to each pair.
+// The function can modify the value and return a boolean indicating whether to continue the iteration.
+// If the function returns false, the iteration breaks, and a new hashtable with modified key-value pairs is returned.
+//
+// Example:
+//
+//	ht := make(hashtable.Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	ht.Add("banana", 3)
+//	newHT := ht.MapBreak(func(key string, value int) (int, bool) {
+//	    if key == "banana" {
+//	        return value * 2, false // Break the iteration when key is "banana"
+//	    }
+//	    return value, true // Continue iterating for other keys
+//	})
+//	// newHT: {"apple": 5}
 func (hashtable *Hashtable[K, V]) MapBreak(fn func(key K, value V) (V, bool)) *Hashtable[K, V] {
+	newHashtable := make(Hashtable[K, V])
 	for key, value := range *hashtable {
 		value, ok := fn(key, value)
 		if !ok {
 			break
 		}
-		hashtable.Add(key, value)
+		newHashtable.Add(key, value)
 	}
-	return hashtable
+	return &newHashtable
 }

@@ -169,7 +169,7 @@ func TestAddManyOK(t *testing.T) {
 	// Verify that the obtained results match the expected results.
 	for i, result := range *results {
 		if result != expectedResults[i] {
-			t.Errorf("Expected result: %v, but got: %v", expectedResults[i], result)
+			t.Fatalf("Expected result: %v, but got: %v", expectedResults[i], result)
 		}
 	}
 
@@ -184,7 +184,7 @@ func TestAddManyOK(t *testing.T) {
 	// Verify that the obtained results match the expected results.
 	for i, result := range *results {
 		if result != expectedResults[i] {
-			t.Errorf("Expected result: %v, but got: %v", expectedResults[i], result)
+			t.Fatalf("Expected result: %v, but got: %v", expectedResults[i], result)
 		}
 	}
 }
@@ -387,7 +387,7 @@ func TestDeleteManyOK(t *testing.T) {
 	// Check if results match the expected results.
 	for i, result := range *results {
 		if result != expectedResults[i] {
-			t.Errorf("Expected deletion of key %s to be %v but got %v", keysToDelete[i], expectedResults[i], result)
+			t.Fatalf("Expected deletion of key %s to be %v but got %v", keysToDelete[i], expectedResults[i], result)
 		}
 	}
 }
@@ -404,19 +404,19 @@ func TestDeleteOK(t *testing.T) {
 	// Delete keys and check if deletion is successful.
 	deleted := ht.DeleteOK("apple")
 	if !deleted {
-		t.Errorf("Expected deletion of 'apple' to be successful")
+		t.Fatalf("Expected deletion of 'apple' to be successful")
 	}
 
 	// Attempt to delete a key that does not exist.
 	notDeleted := ht.DeleteOK("grape")
 	if !notDeleted {
-		t.Errorf("Expected deletion of 'grape' to be successful because the key does not exist")
+		t.Fatalf("Expected deletion of 'grape' to be successful because the key does not exist")
 	}
 
 	// Attempt to delete a key that has already been deleted.
 	alreadyDeleted := ht.DeleteOK("apple")
 	if !alreadyDeleted {
-		t.Errorf("Expected deletion of 'apple' to be successful even though it was already deleted")
+		t.Fatalf("Expected deletion of 'apple' to be successful even though it was already deleted")
 	}
 }
 
@@ -729,6 +729,7 @@ func TestKeys(t *testing.T) {
 	}
 }
 
+// TestKeysFunc tests Hashtable.Keys.
 func TestKeysFunc(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -750,6 +751,7 @@ func TestKeysFunc(t *testing.T) {
 	}
 }
 
+// TestLength tests Hashtable.Length.
 func TestLength(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -766,5 +768,66 @@ func TestLength(t *testing.T) {
 	// Verify that the obtained length matches the expected length.
 	if length != expectedLength {
 		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+}
+
+func TestMap(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Define a function to double the values.
+	doubleValue := func(key string, value int) int {
+		return value * 2
+	}
+
+	// Apply the function to double the values in the hashtable.
+	doubledHT := ht.Map(doubleValue)
+
+	// Expected doubled values.
+	expectedValues := map[string]int{"apple": 10, "banana": 6, "cherry": 16}
+	for key, expectedValue := range expectedValues {
+		value, exists := (*doubledHT)[key]
+		if !exists || value != expectedValue {
+			t.Fatalf("Expected value %d for key %s, but got %d", expectedValue, key, value)
+		}
+	}
+
+	// Ensure the original hashtable remains unchanged.
+	for key, expectedValue := range expectedValues {
+		value, exists := ht[key]
+		if !exists || value != expectedValue/2 {
+			t.Fatalf("Expected original value %d for key %s, but got %d", expectedValue/2, key, value)
+		}
+	}
+}
+
+// TestMapBreak tests Hashtable.MapBreak.
+func TestMapBreak(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht["banana"] = 3
+
+	// Apply the MapBreak function to modify values and break the iteration at "banana".
+	ht.MapBreak(func(key string, value int) (int, bool) {
+		if key == "banana" {
+			return value * 2, false // Break the iteration when key is "banana"
+		}
+		return value * 2, true // Continue iterating for other keys and double the values
+	})
+
+	// Check if values are not modified as expected.
+	expectedValues := map[string]int{"banana": 3}
+	for key, expectedValue := range expectedValues {
+		value, exists := ht.Get(key)
+		if !exists || value != expectedValue {
+			t.Fatalf("Expected value %d for key %s, but got %d", expectedValue, key, value)
+		}
 	}
 }
