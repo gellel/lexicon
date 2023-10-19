@@ -153,6 +153,42 @@ func TestAddMany(t *testing.T) {
 	}
 }
 
+// TestAddManyOK tests Hashtable.AddManyOK.
+func TestAddManyOK(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Attempt to add multiple key-value pairs and get the results indicating success.
+	results := ht.AddManyOK(
+		map[string]int{"apple": 5, "banana": 3, "cherry": 8},
+	)
+
+	// Expected results: [true, true, true] indicating successful insertions for "apple", "banana" and "cherry".
+	expectedResults := []bool{true, true, true}
+
+	// Verify that the obtained results match the expected results.
+	for i, result := range *results {
+		if result != expectedResults[i] {
+			t.Fatalf("Expected result: %v, but got: %v", expectedResults[i], result)
+		}
+	}
+
+	// Attempt to add multiple key-value pairs and get the results indicating success.
+	results = ht.AddManyOK(
+		map[string]int{"apple": 5, "banana": 3, "cherry": 8},
+	)
+
+	// Expected results: [false, false, false] indicating unsuccessful insertions for "apple", "banana" and "cherry" due to existing key.
+	expectedResults = []bool{false, false, false}
+
+	// Verify that the obtained results match the expected results.
+	for i, result := range *results {
+		if result != expectedResults[i] {
+			t.Fatalf("Expected result: %v, but got: %v", expectedResults[i], result)
+		}
+	}
+}
+
 // TestAddOK tests Hashtable.AddOK.
 func TestAddOK(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
@@ -313,6 +349,7 @@ func TestDeleteMany(t *testing.T) {
 	}
 }
 
+// TestDeleteManyValues tests Hashtable.DeleteManyValues.
 func TestDeleteManyValues(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -327,6 +364,59 @@ func TestDeleteManyValues(t *testing.T) {
 	expected := hashtable.Hashtable[string, int]{"apple": 5}
 	if !reflect.DeepEqual(ht, expected) {
 		t.Fatalf("Expected hashtable: %v, but got: %v", expected, ht)
+	}
+}
+
+// TestDeleteManyOK tests Hashtable.DeleteManyOK.
+func TestDeleteManyOK(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+
+	// Specify keys to delete.
+	keysToDelete := []string{"apple", "grape"}
+
+	// Attempt to delete keys and check if deletion is successful.
+	results := ht.DeleteManyOK(keysToDelete...)
+
+	expectedResults := []bool{true, true} // Expected results for "apple" (exists) and "grape" (does not exist)
+
+	// Check if results match the expected results.
+	for i, result := range *results {
+		if result != expectedResults[i] {
+			t.Fatalf("Expected deletion of key %s to be %v but got %v", keysToDelete[i], expectedResults[i], result)
+		}
+	}
+}
+
+// TestDeleteOK tests Hashtable.DeleteOK.
+func TestDeleteOK(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+
+	// Delete keys and check if deletion is successful.
+	deleted := ht.DeleteOK("apple")
+	if !deleted {
+		t.Fatalf("Expected deletion of 'apple' to be successful")
+	}
+
+	// Attempt to delete a key that does not exist.
+	notDeleted := ht.DeleteOK("grape")
+	if !notDeleted {
+		t.Fatalf("Expected deletion of 'grape' to be successful because the key does not exist")
+	}
+
+	// Attempt to delete a key that has already been deleted.
+	alreadyDeleted := ht.DeleteOK("apple")
+	if !alreadyDeleted {
+		t.Fatalf("Expected deletion of 'apple' to be successful even though it was already deleted")
 	}
 }
 
@@ -639,6 +729,7 @@ func TestKeys(t *testing.T) {
 	}
 }
 
+// TestKeysFunc tests Hashtable.Keys.
 func TestKeysFunc(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -660,6 +751,7 @@ func TestKeysFunc(t *testing.T) {
 	}
 }
 
+// TestLength tests Hashtable.Length.
 func TestLength(t *testing.T) {
 	// Create a new hashtable.
 	ht := make(hashtable.Hashtable[string, int])
@@ -676,5 +768,66 @@ func TestLength(t *testing.T) {
 	// Verify that the obtained length matches the expected length.
 	if length != expectedLength {
 		t.Fatalf("Expected length: %d, but got: %d", expectedLength, length)
+	}
+}
+
+func TestMap(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht["apple"] = 5
+	ht["banana"] = 3
+	ht["cherry"] = 8
+
+	// Define a function to double the values.
+	doubleValue := func(key string, value int) int {
+		return value * 2
+	}
+
+	// Apply the function to double the values in the hashtable.
+	doubledHT := ht.Map(doubleValue)
+
+	// Expected doubled values.
+	expectedValues := map[string]int{"apple": 10, "banana": 6, "cherry": 16}
+	for key, expectedValue := range expectedValues {
+		value, exists := (*doubledHT)[key]
+		if !exists || value != expectedValue {
+			t.Fatalf("Expected value %d for key %s, but got %d", expectedValue, key, value)
+		}
+	}
+
+	// Ensure the original hashtable remains unchanged.
+	for key, expectedValue := range expectedValues {
+		value, exists := ht[key]
+		if !exists || value != expectedValue/2 {
+			t.Fatalf("Expected original value %d for key %s, but got %d", expectedValue/2, key, value)
+		}
+	}
+}
+
+// TestMapBreak tests Hashtable.MapBreak.
+func TestMapBreak(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+
+	// Add key-value pairs to the hashtable.
+	ht["banana"] = 3
+
+	// Apply the MapBreak function to modify values and break the iteration at "banana".
+	ht.MapBreak(func(key string, value int) (int, bool) {
+		if key == "banana" {
+			return value * 2, false // Break the iteration when key is "banana"
+		}
+		return value * 2, true // Continue iterating for other keys and double the values
+	})
+
+	// Check if values are not modified as expected.
+	expectedValues := map[string]int{"banana": 3}
+	for key, expectedValue := range expectedValues {
+		value, exists := ht.Get(key)
+		if !exists || value != expectedValue {
+			t.Fatalf("Expected value %d for key %s, but got %d", expectedValue, key, value)
+		}
 	}
 }
