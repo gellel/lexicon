@@ -23,27 +23,6 @@ func (hashtable *Hashtable[K, V]) Add(key K, value V) *Hashtable[K, V] {
 	return hashtable
 }
 
-// AddFunc inserts key-value pairs into the hashtable based on the values provided in the input slice of maps.
-// It applies the provided function to each key-value pair and adds them to the hashtable if the function returns true.
-// If the key already exists in the hashtable, the corresponding value is updated with the new value from the input.
-//
-//	newHashtable := make(hashtable.Hashtable[string, int])
-//	newHashtable.AddFunc([]map[string]int{{"apple": 1, "orange": 2}}, func(key string, value int) bool {
-//	    // Only add key-value pairs where the value is greater than 1.
-//	    return value > 1
-//	})
-//	fmt.Println(newHashtable) // &map[orange:10]
-func (hashtable *Hashtable[K, V]) AddFunc(values []map[K]V, fn func(key K, value V) bool) *Hashtable[K, V] {
-	for _, item := range values {
-		for key, value := range item {
-			if fn(key, value) {
-				hashtable.Add(key, value)
-			}
-		}
-	}
-	return hashtable
-}
-
 // AddLength inserts a new key-value pair into the hashtable or updates the existing value associated with the provided key.
 // If the key already exists, the corresponding value is updated. If the key is new, a new key-value pair is added to the hashtable.
 // It then returns the current length of the hashtable after the addition or update operation.
@@ -147,27 +126,6 @@ func (hashtable *Hashtable[K, V]) Delete(key K) *Hashtable[K, V] {
 	return hashtable
 }
 
-// DeleteFunc removes key-value pairs from the hashtable based on the provided function. The function is applied to each key-value pair,
-// and if it returns true, the corresponding key-value pair is deleted from the hashtable.
-//
-//	newHashtable := make(hashtable.Hashtable[string, int])
-//	newHashtable.Add("apple", 5)
-//	newHashtable.Add("banana", 3)
-//
-//	// Delete key-value pairs where the value is less than 4.
-//	newHashtable.DeleteFunc(func(key string, value int) bool {
-//		return value < 4
-//	})
-//	fmt.Println(newHashtable) // &map[apple:5]
-func (hashtable *Hashtable[K, V]) DeleteFunc(fn func(key K, value V) bool) *Hashtable[K, V] {
-	for key, value := range *hashtable {
-		if fn(key, value) {
-			hashtable.Delete(key)
-		}
-	}
-	return hashtable
-}
-
 // DeleteLength removes a key-value pair from the hashtable based on the provided key. If the key exists in the hashtable,
 // it is deleted, and the current length of the hashtable after the deletion is returned. If the key is not found,
 // the hashtable remains unchanged, and the current length is returned.
@@ -197,6 +155,27 @@ func (hashtable *Hashtable[K, V]) DeleteLength(key K) int {
 func (hashtable *Hashtable[K, V]) DeleteMany(keys ...K) *Hashtable[K, V] {
 	for _, key := range keys {
 		hashtable.Delete(key)
+	}
+	return hashtable
+}
+
+// DeleteFunc removes key-value pairs from the hashtable based on the provided function. The function is applied to each key-value pair,
+// and if it returns true, the corresponding key-value pair is deleted from the hashtable.
+//
+//	newHashtable := make(hashtable.Hashtable[string, int])
+//	newHashtable.Add("apple", 5)
+//	newHashtable.Add("banana", 3)
+//
+//	// Delete key-value pairs where the value is less than 4.
+//	newHashtable.DeleteFunc(func(key string, value int) bool {
+//		return value < 4
+//	})
+//	fmt.Println(newHashtable) // &map[apple:5]
+func (hashtable *Hashtable[K, V]) DeleteManyFunc(fn func(key K, value V) bool) *Hashtable[K, V] {
+	for key, value := range *hashtable {
+		if fn(key, value) {
+			hashtable.Delete(key)
+		}
 	}
 	return hashtable
 }
@@ -490,6 +469,19 @@ func (hashtable *Hashtable[K, V]) HasMany(keys ...K) *slice.Slice[bool] {
 	return &values
 }
 
+// IsEmpty checks if the hashtable is empty, i.e., it contains no key-value pairs.
+// It returns true if the hashtable is empty and false otherwise.
+//
+//	ht := make(Hashtable[string, int])
+//	empty := ht.IsEmpty()  // Returns true since the hashtable is empty
+func (hashtable *Hashtable[K, V]) IsEmpty() bool {
+	return hashtable.Length() == 0
+}
+
+func (hashtable *Hashtable[K, V]) IsPopulated() bool {
+	return !hashtable.IsEmpty()
+}
+
 // Keys returns a slice containing all the keys present in the hashtable.
 //
 //	newHashtable := make(hashtable.Hashtable[string, int])
@@ -597,6 +589,23 @@ func (hashtable *Hashtable[K, V]) Not(key K) bool {
 	return !hashtable.Has(key)
 }
 
+// NotMany checks if multiple keys are not present in the hashtable.
+// It takes a variadic number of keys as input and returns a slice of booleans indicating whether each key is not found in the hashtable.
+// For each key, if it is not present in the hashtable, the corresponding boolean in the returned slice is true. Otherwise, it is false.
+//
+//	ht := make(Hashtable[string, int])
+//	results := ht.NotMany("apple", "orange", "banana")
+//	// Returns a slice containing [true, true, false] indicating "apple" and "orange" are not in the hashtable, but "banana" is present
+func (hashtable *Hashtable[K, V]) NotMany(keys ...K) *slice.Slice[bool] {
+	values := make(slice.Slice[bool], len(keys))
+	for i, key := range keys {
+		if hashtable.Not(key) {
+			values.Replace(i, true)
+		}
+	}
+	return &values
+}
+
 // Pop removes a key-value pair from the hashtable based on the provided key.
 // It returns the removed value and a boolean indicating whether the key was found and removed successfully.
 // If the key is present in the hashtable, the corresponding value is returned, and the key-value pair is deleted.
@@ -634,7 +643,18 @@ func (hashtable *Hashtable[K, V]) PopMany(keys ...K) *slice.Slice[V] {
 	return &values
 }
 
-// Update iterates over the key-value pairs in the hashtable and applies the provided function to each pair.
+func (hashtable *Hashtable[K, V]) PopManyFunc(fn func(key K, value V) bool) *slice.Slice[V] {
+	values := make(slice.Slice[V], 0)
+	hashtable.Each(func(key K, value V) {
+		if fn(key, value) {
+			value, _ := hashtable.Pop(key)
+			values.Append(value)
+		}
+	})
+	return &values
+}
+
+// ReplaceMany iterates over the key-value pairs in the hashtable and applies the provided function to each pair.
 // The function can modify the value and return a boolean indicating whether the update should be performed.
 // If the function returns true, the key-value pair is updated in the same hashtable with the modified value.
 // If the function returns false, the key-value pair is not modified.
@@ -642,14 +662,14 @@ func (hashtable *Hashtable[K, V]) PopMany(keys ...K) *slice.Slice[V] {
 //	newHashtable := make(hashtable.Hashtable[string, int])
 //	newHashtable.Add("apple", 5)
 //	newHashtable.Add("banana", 3)
-//	newHashtable.Update(func(key string, value int) (int, bool) {
+//	newHashtable.Replace(func(key string, value int) (int, bool) {
 //	    if key == "banana" {
 //	        return value * 2, true // Modify the value for the "banana" key
 //	    }
 //	    return value, false // Leave other values unchanged
 //	})
 //	// newHashtable: {"apple": 5, "banana": 6}
-func (hashtable *Hashtable[K, V]) Update(fn func(key K, value V) (V, bool)) *Hashtable[K, V] {
+func (hashtable *Hashtable[K, V]) ReplaceMany(fn func(key K, value V) (V, bool)) *Hashtable[K, V] {
 	for key, value := range *hashtable {
 		if updatedValue, ok := fn(key, value); ok {
 			hashtable.Add(key, updatedValue)
