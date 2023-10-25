@@ -182,8 +182,10 @@ func TestAddManyOK(t *testing.T) {
 	// Test case 1: Add key-value pairs to an empty hashtable.
 	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
 	results := ht.AddManyOK(
-		map[string]int{"apple": 5, "banana": 3},
-		map[string]int{"banana": 10, "cherry": 8},
+		map[string]int{"apple": 5},
+		map[string]int{"banana": 3},
+		map[string]int{"banana": 10},
+		map[string]int{"cherry": 8},
 	)
 
 	// Verify the success status of insertions.
