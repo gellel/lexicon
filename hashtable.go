@@ -111,6 +111,25 @@ func (hashtable *Hashtable[K, V]) AddOK(key K, value V) bool {
 	return ok
 }
 
+// Contains checks if the given value is present in the hashtable and returns the first key-value pair that matches the value.
+// It takes a value as input and returns the key and a boolean indicating whether the value is found in the hashtable.
+// If the value is found, it returns the corresponding key and true. If the value is not found, it returns the zero value for the key type and false.
+//
+//	ht := make(Hashtable[string, int])
+//	key, found := ht.Contains(5)  // Checks if value 5 is in the hashtable, returns the key ("apple" for example) and true if found, or ("", false) if not found
+func (hashtable *Hashtable[K, V]) Contains(value V) (K, bool) {
+	var k K
+	var ok bool
+	hashtable.EachBreak(func(key K, v V) bool {
+		ok = reflect.DeepEqual(v, value)
+		if ok {
+			k = key
+		}
+		return !ok
+	})
+	return k, ok
+}
+
 // Delete removes a key-value pair from the hashtable based on the provided key. If the key exists in the hashtable,
 // it is deleted, and the modified hashtable is returned. If the key is not found, the hashtable remains unchanged.
 //
@@ -248,13 +267,10 @@ func (hashtable *Hashtable[K, V]) DeleteOK(key K) bool {
 //	newHashtable.Add("banana", 3)
 //	newHashtable.Add("cherry", 8)
 //
-//	// Function to print all key-value pairs.
-//	printKeyValue := func(key string, value int) {
-//	    fmt.Println(key, value)
-//	}
-//
 //	// Iterate over the hashtable and print all key-value pairs.
-//	newHashtable.Each(printKeyValue)
+//	newHashtable.Each(func(key string, value int) {
+//	    fmt.Println(key, value)
+//	})
 //	// Output: "apple 5", "banana 3", "cherry 8"
 func (hashtable *Hashtable[K, V]) Each(fn func(key K, value V)) *Hashtable[K, V] {
 	return hashtable.EachBreak(func(key K, value V) bool {
@@ -294,13 +310,10 @@ func (hashtable *Hashtable[K, V]) EachBreak(fn func(key K, value V) bool) *Hasht
 //	newHashtable.Add("banana", 3)
 //	newHashtable.Add("cherry", 8)
 //
-//	// Function to print each key.
-//	printKey := func(key string) {
-//	    fmt.Println(key)
-//	}
-//
 //	// Iterate over the hashtable and print each key.
-//	newHashtable.EachKey(printKey)
+//	newHashtable.EachKey(func(key string) {
+//	    fmt.Println(key)
+//	})
 //	// Output: "apple", "banana", "cherry"
 func (hashtable *Hashtable[K, V]) EachKey(fn func(key K)) *Hashtable[K, V] {
 	return hashtable.Each(func(key K, _ V) {
@@ -315,14 +328,11 @@ func (hashtable *Hashtable[K, V]) EachKey(fn func(key K)) *Hashtable[K, V] {
 //	newHashtable.Add("banana", 3)
 //	newHashtable.Add("cherry", 8)
 //
-//	// Function to print each key and break the iteration if the key is "banana".
-//	printAndBreak := func(key string) bool {
+//	// Iterate over the hashtable keys, print them, and break when "banana" is encountered.
+//	newHashtable.EachKeyBreak(func(key string) bool {
 //	    fmt.Println(key)
 //	    return key != "banana"
-//	}
-//
-//	// Iterate over the hashtable keys, print them, and break when "banana" is encountered.
-//	newHashtable.EachKeyBreak(printAndBreak)
+//	})
 //	// Output: "apple", "banana"
 func (hashtable *Hashtable[K, V]) EachKeyBreak(fn func(key K) bool) *Hashtable[K, V] {
 	return hashtable.EachBreak(func(key K, _ V) bool {
@@ -337,13 +347,10 @@ func (hashtable *Hashtable[K, V]) EachKeyBreak(fn func(key K) bool) *Hashtable[K
 //	newHashtable.Add("banana", 3)
 //	newHashtable.Add("cherry", 8)
 //
-//	// Function to print each value.
-//	printValue := func(value int) {
-//	    fmt.Println(value)
-//	}
-//
 //	// Iterate over the hashtable values and print them.
-//	newHashtable.EachValue(printValue)
+//	newHashtable.EachValue(func(value int) {
+//	    fmt.Println(value)
+//	})
 //	// Output: 5, 3, 8
 func (hashtable *Hashtable[K, V]) EachValue(fn func(value V)) *Hashtable[K, V] {
 	return hashtable.Each(func(_ K, value V) {
@@ -359,19 +366,89 @@ func (hashtable *Hashtable[K, V]) EachValue(fn func(value V)) *Hashtable[K, V] {
 //	newHashtable.Add("banana", 3)
 //	newHashtable.Add("cherry", 8)
 //
-//	// Function to process each value. Returns false to break the iteration if the value is 3.
-//	processValue := func(value int) bool {
+//	// Iterate over the hashtable values and process them until the value is 3.
+//	newHashtable.EachValueBreak(func(value int) bool {
 //	    fmt.Println(value)
 //	    return value != 3
-//	}
-//
-//	// Iterate over the hashtable values and process them until the value is 3.
-//	newHashtable.EachValueBreak(processValue)
+//	})
 //	// Output: 5, 3
 func (hashtable *Hashtable[K, V]) EachValueBreak(fn func(value V) bool) *Hashtable[K, V] {
 	return hashtable.EachBreak(func(_ K, value V) bool {
 		return fn(value)
 	})
+}
+
+// Equal checks if the current hashtable is equal to another hashtable by comparing the key-value pairs directly using reflect.DeepEqual.
+// It takes another hashtable as input and returns true if the two hashtables are equal, false otherwise.
+//
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	ht1.Add("orange", 10)
+//
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("apple", 5)
+//	ht2.Add("orange", 10)
+//
+//	equal := ht1.Equal(ht2)  // Returns true because ht1 and ht2 have the same key-value pairs
+func (hashtable *Hashtable[K, V]) Equal(otherHashtable *Hashtable[K, V]) bool {
+	return hashtable.EqualFunc(otherHashtable, func(a, b V) bool {
+		return reflect.DeepEqual(a, b)
+	})
+}
+
+// EqualFunc checks if the current hashtable is equal to another hashtable based on a provided comparison function.
+// It takes another hashtable and a comparison function as input and returns true if the two hashtables are equal according to the function.
+// The comparison function takes two values as input and returns true if they are considered equal, false otherwise.
+//
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	ht1.Add("orange", 10)
+//
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("apple", 5)
+//	ht2.Add("orange", 11)
+//
+//	equal := ht1.EqualFunc(ht2, func(a, b int) bool {
+//		return math.Abs(float64(a - b)) <= 1
+//	})  // Returns true because the values for "orange" (10 and 11) have a difference of 1, within the allowed range
+func (hashtable *Hashtable[K, V]) EqualFunc(otherHashtable *Hashtable[K, V], fn func(a V, b V) bool) bool {
+	if !hashtable.EqualLength(otherHashtable) {
+		return false
+	}
+	for key, value := range *hashtable {
+		v, ok := otherHashtable.Get(key)
+		if !ok || !fn(value, v) {
+			return false
+		}
+	}
+	return true
+}
+
+// EqualLength checks if the current hashtable has the same length as another hashtable.
+// It takes another hashtable as input and returns true if the two hashtables have the same length, false otherwise.
+//
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	ht1.Add("orange", 10)
+//
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("apple", 5)
+//
+//	equalLength := ht1.EqualLength(ht2)  // Returns false because ht1 has a length of 2, while ht2 has a length of 1
+func (hashtable *Hashtable[K, V]) EqualLength(otherHashtable *Hashtable[K, V]) bool {
+	return hashtable.Length() == otherHashtable.Length()
+}
+
+// Fetch retrieves the value associated with the given key from the hashtable.
+// It returns the value if the key is found in the hashtable, and the zero value for the value type if the key is not present.
+//
+//	ht := make(Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	value := ht.Fetch("apple")  // Returns 5, the value associated with the key "apple"
+//	value = ht.Fetch("orange")  // Returns 0 because "orange" is not in the hashtable
+func (hashtable *Hashtable[K, V]) Fetch(key K) V {
+	value, _ := hashtable.Get(key)
+	return value
 }
 
 // Get retrieves the value associated with the provided key from the hashtable.
@@ -394,13 +471,10 @@ func (hashtable *Hashtable[K, V]) Get(key K) (V, bool) {
 //	newHashtable.Add("banana", 3)
 //	newHashtable.Add("cherry", 8)
 //
-//	// Function to filter key-value pairs. Returns true if the value is greater than 4.
-//	filterFunc := func(key string, value int) bool {
-//		return value > 4
-//	}
-//
 //	// Create a new hashtable containing key-value pairs where the value is greater than 4.
-//	filteredHashtable := newHashtable.Filter(filterFunc)
+//	filteredHashtable := newHashtable.Filter(func(key string, value int) bool {
+//		return value > 4
+//	})
 func (hashtable *Hashtable[K, V]) Filter(fn func(key K, value V) bool) *Hashtable[K, V] {
 	filteredHashtable := make(Hashtable[K, V], 0)
 	hashtable.Each(func(key K, value V) {
@@ -467,6 +541,49 @@ func (hashtable *Hashtable[K, V]) HasMany(keys ...K) *slice.Slice[bool] {
 		}
 	}
 	return &values
+}
+
+// Intersection creates a new hashtable containing key-value pairs that exist in both the current hashtable and another hashtable.
+// It compares values using reflect.DeepEqual to determine equality between the pairs.
+// It takes another hashtable as input and returns a new hashtable containing the intersecting key-value pairs.
+//
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("apple", 5)
+//	ht2.Add("orange", 10)
+//
+//	newHashtable := ht1.Intersection(ht2)  // Creates a new hashtable with the pair "apple": 5
+func (hashtable *Hashtable[K, V]) Intersection(otherHashtable *Hashtable[K, V]) *Hashtable[K, V] {
+	return hashtable.IntersectionFunc(otherHashtable, func(key K, a, b V) bool {
+		return reflect.DeepEqual(a, b)
+	})
+}
+
+// IntersectionFunc creates a new hashtable containing key-value pairs that exist in both the current hashtable and another hashtable.
+// It takes another hashtable and a condition function as input and adds key-value pairs from the current hashtable to the new hashtable
+// if the condition function evaluates to true for the corresponding key-value pair in the other hashtable.
+//
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	ht1.Add("orange", 8)
+//
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("orange", 8)
+//	ht2.Add("banana", 6)
+//
+//	newHashtable := ht1.IntersectionFunc(ht2, func(key string, a, b int) bool {
+//		return a == b
+//	})  // Creates a new hashtable with the pair "orange": 8
+func (hashtable *Hashtable[K, V]) IntersectionFunc(otherHashtable *Hashtable[K, V], fn func(key K, a V, b V) bool) *Hashtable[K, V] {
+	newHashtable := make(Hashtable[K, V], 0)
+	hashtable.Each(func(key K, value V) {
+		if v, ok := otherHashtable.Get(key); ok && fn(key, value, v) {
+			newHashtable.Add(key, value)
+		}
+	})
+	return &newHashtable
 }
 
 // IsEmpty checks if the hashtable is empty, i.e., it contains no key-value pairs.
@@ -540,13 +657,10 @@ func (hashtable *Hashtable[K, V]) Length() int {
 //	newHashtable.Add("apple", 5)
 //	newHashtable.Add("banana", 3)
 //
-//	// Function to double the values of each key-value pair.
-//	doubleValues := func(key string, value int) int {
-//		return value * 2
-//	}
-//
 //	// Create a new hashtable with doubled values.
-//	newHashtable := newHashtable.Map(doubleValues)
+//	newHashtable := newHashtable.Map(func(key string, value int) int {
+//		return value * 2
+//	})
 //	// New hashtable: {"apple": 10, "banana": 6}
 func (hashtable *Hashtable[K, V]) Map(fn func(key K, value V) V) *Hashtable[K, V] {
 	return hashtable.MapBreak(func(key K, value V) (V, bool) {
@@ -578,6 +692,45 @@ func (hashtable *Hashtable[K, V]) MapBreak(fn func(key K, value V) (V, bool)) *H
 		newHashtable.Add(key, value)
 	}
 	return &newHashtable
+}
+
+// Merge merges all key-value pairs from another hashtable into the current hashtable.
+// It takes another hashtable as input and adds all its key-value pairs to the current hashtable.
+//
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("orange", 10)
+//
+//	ht1.Merge(ht2)  // Adds "orange": 10 to ht1
+func (hashtable *Hashtable[K, V]) Merge(otherHashtable *Hashtable[K, V]) *Hashtable[K, V] {
+	return hashtable.MergeFunc(otherHashtable, func(key K, value V) bool { return true })
+}
+
+// MergeFunc merges the key-value pairs from another hashtable into the current hashtable based on a provided condition function.
+// It takes another hashtable and a condition function as input and adds key-value pairs from the other hashtable to the current hashtable
+// if the condition function evaluates to true for the given key-value pair from the other hashtable.
+//
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	ht1.Add("orange", 10)
+//
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("orange", 8)
+//	ht2.Add("banana", 6)
+//
+//	// Condition function to merge pairs where the value in ht2 is greater than 7
+//	ht1.MergeFunc(ht2, func(key string, value int) bool {
+//		return value > 7
+//	})  // Adds "orange": 8 to ht1, "banana": 6 does not meet the condition and is not added
+func (hashtable *Hashtable[K, V]) MergeFunc(otherHashtable *Hashtable[K, V], fn func(key K, value V) bool) *Hashtable[K, V] {
+	otherHashtable.Each(func(key K, value V) {
+		if fn(key, value) {
+			hashtable.Add(key, value)
+		}
+	})
+	return hashtable
 }
 
 // Not checks if the given key is not present in the hashtable.
@@ -702,10 +855,9 @@ func (hashtable *Hashtable[K, V]) Values() *slice.Slice[V] {
 //	ht := make(Hashtable[string, int])
 //	ht.Add("apple", 5)
 //	ht.Add("orange", 10)
-//	filterFunc := func(key string, value int) bool {
+//	values := ht.ValuesFunc(func(key string, value int) bool {
 //		return value > 7  // Include values greater than 7 in the result
-//	}
-//	values := ht.ValuesFunc(filterFunc)  // Returns a slice containing [10]
+//	})  // Returns a slice containing [10]
 func (hashtable *Hashtable[K, V]) ValuesFunc(fn func(key K, value V) bool) *slice.Slice[V] {
 	values := make(slice.Slice[V], 0)
 	hashtable.Each(func(key K, value V) {
