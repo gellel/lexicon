@@ -227,42 +227,6 @@ func TestAddManyOK(t *testing.T) {
 	}
 }
 
-// TestAddManyOK tests Hashtable.AddManyOK.
-func TestAddManyOK(t *testing.T) {
-	// Create a new hashtable.
-	ht := make(hashtable.Hashtable[string, int])
-
-	// Attempt to add multiple key-value pairs and get the results indicating success.
-	results := ht.AddManyOK(
-		map[string]int{"apple": 5, "banana": 3, "cherry": 8},
-	)
-
-	// Expected results: [true, true, true] indicating successful insertions for "apple", "banana" and "cherry".
-	expectedResults := []bool{true, true, true}
-
-	// Verify that the obtained results match the expected results.
-	for i, result := range *results {
-		if result != expectedResults[i] {
-			t.Fatalf("Expected result: %v, but got: %v", expectedResults[i], result)
-		}
-	}
-
-	// Attempt to add multiple key-value pairs and get the results indicating success.
-	results = ht.AddManyOK(
-		map[string]int{"apple": 5, "banana": 3, "cherry": 8},
-	)
-
-	// Expected results: [false, false, false] indicating unsuccessful insertions for "apple", "banana" and "cherry" due to existing key.
-	expectedResults = []bool{false, false, false}
-
-	// Verify that the obtained results match the expected results.
-	for i, result := range *results {
-		if result != expectedResults[i] {
-			t.Fatalf("Expected result: %v, but got: %v", expectedResults[i], result)
-		}
-	}
-}
-
 // TestAddOK tests Hashtable.AddOK.
 func TestAddOK(t *testing.T) {
 	ht := make(hashtable.Hashtable[string, int])
@@ -393,24 +357,6 @@ func TestDeleteMany(t *testing.T) {
 	}
 }
 
-// TestDeleteManyValues tests Hashtable.DeleteManyValues.
-func TestDeleteManyValues(t *testing.T) {
-	// Create a new hashtable.
-	ht := make(hashtable.Hashtable[string, int])
-	ht.Add("apple", 5)
-	ht.Add("banana", 3)
-	ht.Add("cherry", 8)
-
-	// Delete key-value pairs where the value is 3 or 8.
-	ht.DeleteManyValues(3, 8)
-
-	// Verify that the hashtable only contains the expected key-value pair.
-	expected := hashtable.Hashtable[string, int]{"apple": 5}
-	if !reflect.DeepEqual(ht, expected) {
-		t.Fatalf("Expected hashtable: %v, but got: %v", expected, ht)
-	}
-}
-
 // TestDeleteManyOK tests Hashtable.DeleteManyOK.
 func TestDeleteManyOK(t *testing.T) {
 	// Create a new hashtable.
@@ -426,13 +372,31 @@ func TestDeleteManyOK(t *testing.T) {
 	// Attempt to delete keys and check if deletion is successful.
 	results := ht.DeleteManyOK(keysToDelete...)
 
-	expectedResults := []bool{true, true} // Expected results for "apple" (exists) and "grape" (does not exist)
+	expectedResults := []bool{true, true} // Expected results for "apple" (exists) and "grape" (does not exist).
 
 	// Check if results match the expected results.
 	for i, result := range *results {
 		if result != expectedResults[i] {
 			t.Fatalf("Expected deletion of key %s to be %v but got %v", keysToDelete[i], expectedResults[i], result)
 		}
+	}
+}
+
+// TestDeleteManyValues tests Hashtable.DeleteManyValues.
+func TestDeleteManyValues(t *testing.T) {
+	// Create a new hashtable.
+	ht := make(hashtable.Hashtable[string, int])
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+	ht.Add("cherry", 8)
+
+	// Delete key-value pairs where the value is 3 or 8.
+	ht.DeleteManyValues(3, 8)
+
+	// Verify that the hashtable only contains the expected key-value pair.
+	expected := hashtable.Hashtable[string, int]{"apple": 5}
+	if !reflect.DeepEqual(ht, expected) {
+		t.Fatalf("Expected hashtable: %v, but got: %v", expected, ht)
 	}
 }
 
@@ -902,9 +866,9 @@ func TestMapBreak(t *testing.T) {
 	// Apply the MapBreak function to modify values and break the iteration at "banana".
 	ht.MapBreak(func(key string, value int) (int, bool) {
 		if key == "banana" {
-			return value * 2, false // Break the iteration when key is "banana"
+			return value * 2, false // Break the iteration when key is "banana".
 		}
-		return value * 2, true // Continue iterating for other keys and double the values
+		return value * 2, true // Continue iterating for other keys and double the values.
 	})
 
 	// Check if values are not modified as expected.
@@ -914,5 +878,226 @@ func TestMapBreak(t *testing.T) {
 		if !exists || value != expectedValue {
 			t.Fatalf("Expected value %d for key %s, but got %d", expectedValue, key, value)
 		}
+	}
+}
+
+// TestNot tests Hashtable.Not.
+func TestNot(t *testing.T) {
+	// Test case 1: Check if a key is not present in an empty hashtable.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	result := ht.Not("apple")                 // Check if "apple" is not in the hashtable.
+	expected := true                          // "apple" is not present in the empty hashtable.
+
+	if result != expected {
+		t.Errorf("Expected result to be %v for key 'apple', but got %v", expected, result)
+	}
+
+	// Test case 2: Check if a key is not present in a non-empty hashtable.
+	ht.Add("orange", 5)
+	ht.Add("banana", 10)
+	result = ht.Not("banana") // Check if "banana" is not in the hashtable.
+	expected = false          // "banana" is present in the hashtable.
+
+	if result != expected {
+		t.Errorf("Expected result to be %v for key 'banana', but got %v", expected, result)
+	}
+
+	// Test case 3: Check if a key is not present after removing it from the hashtable.
+	ht.Delete("banana") // Delete "banana" from the hashtable.
+	result = ht.Not("banana")
+	expected = true // "banana" is not present after removal.
+
+	if result != expected {
+		t.Errorf("Expected result to be %v for key 'banana' after removal, but got %v", expected, result)
+	}
+}
+
+// TestPop tests Hashtable.Pop.
+func TestPop(t *testing.T) {
+	// Test case 1: Pop from an empty hashtable.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	removedValue, ok := ht.Pop("apple")
+	if ok || removedValue != 0 {
+		t.Errorf("Expected (0, false), but got (%d, %v)", removedValue, ok)
+	}
+
+	// Test case 2: Pop from a non-empty hashtable where the key is present.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	removedValue, ok = ht.Pop("apple")
+	if !ok || removedValue != 5 {
+		t.Errorf("Expected (5, true), but got (%d, %v)", removedValue, ok)
+	}
+	// Verify that the key is removed.
+	_, ok = ht.Get("apple")
+	if ok {
+		t.Errorf("Expected key 'apple' to be removed, but it was found")
+	}
+
+	// Test case 3: Pop from a non-empty hashtable where the key is not present.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	removedValue, ok = ht.Pop("banana")
+	if ok || removedValue != 0 {
+		t.Errorf("Expected (0, false), but got (%d, %v)", removedValue, ok)
+	}
+}
+
+func TestPopMany(t *testing.T) {
+	// Test case 1: PopMany from an empty hashtable.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	removedValues := ht.PopMany("apple", "orange")
+	expectedValues := &slice.Slice[int]{}
+	if !reflect.DeepEqual(removedValues, expectedValues) {
+		t.Errorf("Expected %v, but got %v", expectedValues, removedValues)
+	}
+
+	// Test case 2: PopMany from a non-empty hashtable where some keys are present.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("banana", 3)
+	ht.Add("cherry", 8)
+	removedValues = ht.PopMany("apple", "orange", "cherry", "grape")
+	expectedValues = &slice.Slice[int]{5, 8}
+	if !reflect.DeepEqual(removedValues, expectedValues) {
+		t.Errorf("Expected %v, but got %v", expectedValues, removedValues)
+	}
+	// Verify that the keys are removed.
+	_, ok := ht.Get("apple")
+	if ok {
+		t.Errorf("Expected key 'apple' to be removed, but it was found")
+	}
+	_, ok = ht.Get("orange")
+	if ok {
+		t.Errorf("Expected key 'orange' to be removed, but it was found")
+	}
+	_, ok = ht.Get("cherry")
+	if ok {
+		t.Errorf("Expected key 'cherry' to be removed, but it was found")
+	}
+	_, ok = ht.Get("grape")
+	if ok {
+		t.Errorf("Expected key 'grape' to be removed, but it was found")
+	}
+}
+
+// TestReplaceMany tests Hashtable.ReplaceMany.
+func TestUpdate(t *testing.T) {
+	// Test case 1: Replace with an empty hashtable and a function that never modifies any pairs.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	replaceFunc := func(key string, value int) (int, bool) {
+		return value, false // Never modify any values
+	}
+	ht.ReplaceMany(replaceFunc)
+	expected := &hashtable.Hashtable[string, int]{} // Expected empty hashtable.
+	if !reflect.DeepEqual(ht, expected) {
+		t.Errorf("Expected %v, but got %v", expected, ht)
+	}
+
+	// Test case 2: Replace with a non-empty hashtable and a function that never modifies any pairs.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	replaceFunc = func(key string, value int) (int, bool) {
+		return value, false // Never modify any values
+	}
+	ht.ReplaceMany(replaceFunc)
+	expected = &hashtable.Hashtable[string, int]{"apple": 5, "orange": 10} // Expected same hashtable.
+	if !reflect.DeepEqual(ht, expected) {
+		t.Errorf("Expected %v, but got %v", expected, ht)
+	}
+
+	// Test case 3: Replace with a non-empty hashtable and a function that modifies certain pairs.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	replaceFunc = func(key string, value int) (int, bool) {
+		if key == "apple" {
+			return value * 2, true // Modify the value for the "apple" key
+		}
+		return value, false // Leave other values unchanged
+	}
+	ht.ReplaceMany(replaceFunc)
+	expected = &hashtable.Hashtable[string, int]{"apple": 10, "orange": 10} // Expected modified hashtable.
+	if !reflect.DeepEqual(ht, expected) {
+		t.Errorf("Expected %v, but got %v", expected, ht)
+	}
+}
+
+// TestValues tests Hashtable.Values.
+func TestValues(t *testing.T) {
+	// Test case 1: Values of an empty hashtable should be an empty slice.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	values := ht.Values()
+	expected := &slice.Slice[int]{} // Expected empty slice.
+	if !reflect.DeepEqual(values, expected) {
+		t.Errorf("Expected %v, but got %v", expected, values)
+	}
+
+	// Test case 2: Values of a non-empty hashtable.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	values = ht.Values()
+	sort.Ints(*values)
+	expected = &slice.Slice[int]{5, 10} // Expected slice containing [5, 10].
+	if !reflect.DeepEqual(values, expected) {
+		t.Errorf("Expected %v, but got %v", expected, values)
+	}
+
+	// Test case 3: Values of a hashtable with multiple entries.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	ht.Add("banana", 15)
+	values = ht.Values()
+
+	sort.Ints(*values)
+	expected = &slice.Slice[int]{5, 10, 15} // Expected slice containing [5, 10, 15].
+	if !reflect.DeepEqual(values, expected) {
+		t.Errorf("Expected %v, but got %v", expected, values)
+	}
+}
+
+// TestValuesFunc tests Hashtable.ValuesFunc.
+func TestValuesFunc(t *testing.T) {
+	// Test case 1: ValuesFunc with an empty hashtable and a condition that never satisfies.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	filterFunc := func(key string, value int) bool {
+		return value > 7 // Include values greater than 7 in the result
+	}
+	values := ht.ValuesFunc(filterFunc)
+	expected := &slice.Slice[int]{} // Expected empty slice.
+	if !reflect.DeepEqual(values, expected) {
+		t.Errorf("Expected %v, but got %v", expected, values)
+	}
+
+	// Test case 2: ValuesFunc with a non-empty hashtable and a condition that never satisfies.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 2)
+	filterFunc = func(key string, value int) bool {
+		return value > 7 // Include values greater than 7 in the result
+	}
+	values = ht.ValuesFunc(filterFunc)
+	expected = &slice.Slice[int]{} // Expected empty slice.
+	if !reflect.DeepEqual(values, expected) {
+		t.Errorf("Expected %v, but got %v", expected, values)
+	}
+
+	// Test case 3: ValuesFunc with a non-empty hashtable and a condition that satisfies for some values.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	ht.Add("banana", 15)
+	filterFunc = func(key string, value int) bool {
+		return value > 7 // Include values greater than 7 in the result
+	}
+	values = ht.ValuesFunc(filterFunc)
+	sort.Ints(*values)
+	expected = &slice.Slice[int]{10, 15} // Expected slice containing [10, 15].
+	if !reflect.DeepEqual(values, expected) {
+		t.Errorf("Expected %v, but got %v", expected, values)
 	}
 }
