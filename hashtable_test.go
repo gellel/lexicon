@@ -1,6 +1,7 @@
 package hashtable_test
 
 import (
+	"math"
 	"reflect"
 	"sort"
 	"strings"
@@ -265,6 +266,40 @@ func TestAddOK(t *testing.T) {
 	value, exists = ht["banana"]
 	if !exists || value != 3 {
 		t.Fatalf("Expected key 'banana' with value '3', but got value '%d'", value)
+	}
+}
+
+// TestContains tests Hashtable.Contains.
+func TestContains(t *testing.T) {
+	// Test case 1: Check for a value in an empty hashtable.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	key, found := ht.Contains(5)              // Check if value 5 is in the hashtable.
+
+	// Since the hashtable is empty, the result should be ("", false).
+	if key != "" || found {
+		t.Errorf("Expected ('', false), but got (%s, %t)", key, found)
+	}
+
+	// Test case 2: Check for a value in a non-empty hashtable.
+	ht = &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht.Add("apple", 5)
+	ht.Add("banana", 10)
+	ht.Add("orange", 5)
+
+	// Check if value 5 is in the hashtable.
+	key, found = ht.Contains(5)
+
+	// Since value 5 exists in the hashtable, the result should be ("apple", true).
+	if !found {
+		t.Errorf("Expected ('%s', true), but got (%s, %t)", key, key, found)
+	}
+
+	// Test case 3: Check for a value that doesn't exist in the hashtable.
+	key, found = ht.Contains(15) // Check if value 15 is in the hashtable.
+
+	// Since value 15 doesn't exist in the hashtable, the result should be ("", false).
+	if key != "" || found {
+		t.Errorf("Expected ('', false), but got (%s, %t)", key, found)
 	}
 }
 
@@ -618,6 +653,150 @@ func TestEachValueBreak(t *testing.T) {
 	}
 }
 
+// TestEqual tests Hashtable.Equal.
+func TestEqual(t *testing.T) {
+	// Test case 1: Compare equal hashtables.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht1.Add("apple", 5)
+	ht1.Add("orange", 10)
+
+	ht2 := &hashtable.Hashtable[string, int]{} // Create another hashtable with similar values.
+	ht2.Add("apple", 5)
+	ht2.Add("orange", 10)
+
+	// Check if the two hashtables are equal.
+	equal := ht1.Equal(ht2)
+
+	// Since ht1 and ht2 have the same key-value pairs, they are considered equal.
+	if !equal {
+		t.Errorf("Expected true, but got false")
+	}
+
+	// Test case 2: Compare unequal hashtables.
+	ht3 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht3.Add("apple", 5)
+	ht3.Add("orange", 10)
+
+	ht4 := &hashtable.Hashtable[string, int]{} // Create another hashtable with different values for "orange".
+	ht4.Add("apple", 5)
+	ht4.Add("orange", 12)
+
+	// Check if the two hashtables are equal.
+	equal = ht3.Equal(ht4)
+
+	// Since ht3 and ht4 have different values for "orange", they are not considered equal.
+	if equal {
+		t.Errorf("Expected false, but got true")
+	}
+}
+
+// TestEqualFunc tests Hashtable.EqualFunc.
+func TestEqualFunc(t *testing.T) {
+	// Custom comparison function to check if two integers are equal when their difference is less than or equal to 1
+	compareFunc := func(a, b int) bool {
+		return math.Abs(float64(a-b)) <= 1
+	}
+
+	// Test case 1: Compare equal hashtables based on the custom comparison function.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht1.Add("apple", 5)
+	ht1.Add("orange", 10)
+
+	ht2 := &hashtable.Hashtable[string, int]{} // Create another hashtable with similar values.
+	ht2.Add("apple", 5)
+	ht2.Add("orange", 11) // The difference between 10 and 11 is within the allowed range according to compareFunc.
+
+	// Check if the two hashtables are equal based on the custom comparison function.
+	equal := ht1.EqualFunc(ht2, compareFunc)
+
+	// Since the values for "orange" (10 and 11) have a difference of 1, within the allowed range,
+	// the hashtables are considered equal according to the custom comparison function.
+	if !equal {
+		t.Errorf("Expected true, but got false")
+	}
+
+	// Test case 2: Compare unequal hashtables based on the custom comparison function.
+	ht3 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht3.Add("apple", 5)
+	ht3.Add("orange", 10)
+
+	ht4 := &hashtable.Hashtable[string, int]{} // Create another hashtable with different values for "orange".
+	ht4.Add("apple", 5)
+	ht4.Add("orange", 12) // The difference between 10 and 12 is greater than the allowed range according to compareFunc.
+
+	// Check if the two hashtables are equal based on the custom comparison function.
+	equal = ht3.EqualFunc(ht4, compareFunc)
+
+	// Since the difference between 10 and 12 is greater than the allowed range according to compareFunc,
+	// the hashtables are not considered equal based on the custom comparison function.
+	if equal {
+		t.Errorf("Expected false, but got true")
+	}
+}
+
+// TestEqualLength tests Hashtable.EqualLength.
+func TestEqualLength(t *testing.T) {
+	// Test case 1: Compare hashtables with equal length.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht1.Add("apple", 5)
+	ht1.Add("orange", 10)
+
+	ht2 := &hashtable.Hashtable[string, int]{} // Create another hashtable with the same number of key-value pairs.
+	ht2.Add("apple", 5)
+	ht2.Add("orange", 7)
+
+	// Check if the two hashtables have equal length.
+	equalLength := ht1.EqualLength(ht2)
+
+	// Since ht1 and ht2 have the same number of key-value pairs, they are considered equal in length.
+	if !equalLength {
+		t.Errorf("Expected true, but got false")
+	}
+
+	// Test case 2: Compare hashtables with unequal length.
+	ht3 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht3.Add("apple", 5)
+
+	ht4 := &hashtable.Hashtable[string, int]{} // Create another hashtable with a different number of key-value pairs.
+	ht4.Add("apple", 5)
+	ht4.Add("orange", 7)
+
+	// Check if the two hashtables have equal length.
+	equalLength = ht3.EqualLength(ht4)
+
+	// Since ht3 and ht4 have different numbers of key-value pairs, they are not considered equal in length.
+	if equalLength {
+		t.Errorf("Expected false, but got true")
+	}
+}
+
+// TestFetch tests Hashtable.Fetch.
+func TestFetch(t *testing.T) {
+	// Test case 1: Fetch value for an existing key.
+	ht := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+
+	// Fetch the value associated with the key "apple".
+	fetchedValue := ht.Fetch("apple")
+
+	// Since "apple" is in the hashtable, the fetched value should be 5.
+	expectedValue := 5
+	if fetchedValue != expectedValue {
+		t.Errorf("Expected %d, but got %d", expectedValue, fetchedValue)
+	}
+
+	// Test case 2: Fetch value for a non-existing key.
+	// Fetch the value associated with the key "banana", which is not in the hashtable.
+	fetchedValue = ht.Fetch("banana")
+
+	// Since "banana" is not in the hashtable, the fetched value should be the zero value for int, which is 0.
+	expectedValue = 0
+	if fetchedValue != expectedValue {
+		t.Errorf("Expected %d, but got %d", expectedValue, fetchedValue)
+	}
+}
+
 // TestFilter tests Hashtable.Filter.
 func TestFilter(t *testing.T) {
 	// Test case 1: Filter with an empty hashtable and a function that never selects any pairs.
@@ -752,6 +931,64 @@ func TestHasMany(t *testing.T) {
 	}
 }
 
+// TestIntersectionFunc tests Hashtable.IntersectionFunc.
+func TestIntersectionFunc(t *testing.T) {
+	// Test case: Check intersection of two hashtables with common key-value pairs.
+	ht1 := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 8,
+	}
+	ht2 := &hashtable.Hashtable[string, int]{
+		"orange": 8,
+		"banana": 6,
+	}
+
+	// Condition function to check if values are equal.
+	conditionFunc := func(key string, a, b int) bool {
+		return a == b
+	}
+
+	newHashtable := ht1.IntersectionFunc(ht2, conditionFunc)
+
+	expectedHashtable := &hashtable.Hashtable[string, int]{
+		"orange": 8,
+	}
+
+	if !newHashtable.Equal(expectedHashtable) {
+		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
+	}
+
+	// Test case: Check intersection of two hashtables with no common key-value pairs.
+	ht1 = &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 8,
+	}
+	ht2 = &hashtable.Hashtable[string, int]{
+		"banana": 10,
+		"grape":  7,
+	}
+
+	newHashtable = ht1.IntersectionFunc(ht2, conditionFunc)
+
+	expectedHashtable = &hashtable.Hashtable[string, int]{}
+
+	if !newHashtable.Equal(expectedHashtable) {
+		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
+	}
+
+	// Test case: Check intersection of empty hashtables.
+	ht1 = &hashtable.Hashtable[string, int]{}
+	ht2 = &hashtable.Hashtable[string, int]{}
+
+	newHashtable = ht1.IntersectionFunc(ht2, conditionFunc)
+
+	expectedHashtable = &hashtable.Hashtable[string, int]{}
+
+	if !newHashtable.Equal(expectedHashtable) {
+		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
+	}
+}
+
 // TestKeys tests Hashtable.Keys.
 func TestKeys(t *testing.T) {
 	// Create a new hashtable.
@@ -878,6 +1115,61 @@ func TestMapBreak(t *testing.T) {
 		if !exists || value != expectedValue {
 			t.Fatalf("Expected value %d for key %s, but got %d", expectedValue, key, value)
 		}
+	}
+}
+
+// TestMerge tests Hashtable.Merge.
+func TestMerge(t *testing.T) {
+	// Test case: Merge all key-value pairs from another hashtable.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht1.Add("apple", 5)
+
+	ht2 := &hashtable.Hashtable[string, int]{} // Create another hashtable.
+	ht2.Add("orange", 10)
+
+	// Merge all key-value pairs from ht2 into ht1.
+	ht1.Merge(ht2)
+
+	// After merging, ht1 should contain: {"apple": 5, "orange": 10}
+	expectedHashtable := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 10,
+	}
+
+	// Verify that ht1 is equal to the expected hashtable.
+	if !ht1.Equal(expectedHashtable) {
+		t.Errorf("Merge did not produce the expected result. Got: %v, Expected: %v", ht1, expectedHashtable)
+	}
+}
+
+// TestMergeFunc tests Hashtable.MergeFunc.
+func TestMergeFunc(t *testing.T) {
+	// Test case: Merge key-value pairs based on the condition function.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create a new hashtable.
+	ht1.Add("apple", 5)
+	ht1.Add("orange", 10)
+
+	ht2 := &hashtable.Hashtable[string, int]{} // Create another hashtable.
+	ht2.Add("orange", 8)
+	ht2.Add("banana", 6)
+
+	// Condition function to merge pairs where the value in ht2 is greater than 7.
+	conditionFunc := func(key string, value int) bool {
+		return value > 7
+	}
+
+	// Merge key-value pairs from ht2 into ht1 based on the condition function.
+	ht1.MergeFunc(ht2, conditionFunc)
+
+	// After merging, ht1 should contain: {"apple": 5, "orange": 8}
+	expectedHashtable := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 8,
+	}
+
+	// Verify that ht1 is equal to the expected hashtable.
+	if !ht1.Equal(expectedHashtable) {
+		t.Errorf("MergeFunc did not produce the expected result. Got: %v, Expected: %v", ht1, expectedHashtable)
 	}
 }
 
