@@ -80,6 +80,7 @@ func (hashtable *Hashtable[K, V]) AddManyFunc(values []map[K]V, fn func(i int, k
 // For each key-value pair, it checks if the key already exists in the hashtable. If the key is not present, the pair is added,
 // and the corresponding boolean in the returned slice is true. If the key already exists, the pair is not added, and the boolean is false.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	results := newHashtable.AddManyOK(map[string]int{"apple": 5, "orange": 3}, map[string]int{"orange": 10, "banana": 7})
 //	// Returns a slice containing [true, false, true] indicating successful insertions for "apple" and "banana"
@@ -120,6 +121,7 @@ func (hashtable *Hashtable[K, V]) AddOK(key K, value V) bool {
 // It takes a value as input and returns the key and a boolean indicating whether the value is found in the hashtable.
 // If the value is found, it returns the corresponding key and true. If the value is not found, it returns the zero value for the key type and false.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	key, found := newHashtable.Contains(5)  // Checks if value 5 is in the hashtable, returns the key ("apple" for example) and true if found, or ("", false) if not found
 func (hashtable *Hashtable[K, V]) Contains(value V) (K, bool) {
@@ -483,6 +485,7 @@ func (hashtable *Hashtable[K, V]) EqualLength(otherHashtable *Hashtable[K, V]) b
 // Fetch retrieves the value associated with the given key from the hashtable.
 // It returns the value if the key is found in the hashtable, and the zero value for the value type if the key is not present.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	newHashtable.Add("apple", 5)
 //	value := newHashtable.Fetch("apple")  // Returns 5, the value associated with the key "apple"
@@ -639,6 +642,7 @@ func (hashtable *Hashtable[K, V]) IntersectionFunc(otherHashtable *Hashtable[K, 
 // IsEmpty checks if the hashtable is empty, i.e., it contains no key-value pairs.
 // It returns true if the hashtable is empty and false otherwise.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	empty := newHashtable.IsEmpty()  // Returns true since the hashtable is empty
 func (hashtable *Hashtable[K, V]) IsEmpty() bool {
@@ -813,9 +817,37 @@ func (hashtable *Hashtable[K, V]) MergeMany(otherHashtables ...*Hashtable[K, V])
 	return hashtable
 }
 
+// MergeManyFunc merges key-value pairs from multiple hashtables into the current hashtable based on a provided condition function.
+// It takes a slice of hashtables and a condition function as input. For each key-value pair in the other hashtables,
+// the function is applied, and if it evaluates to true, the pair is added to the current hashtable.
+//
+//	// Create a new Hashtable instance.
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	// Create a new Hashtable instance.
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("orange", 10)
+//	// Create a new Hashtable instance.
+//	ht3 := make(Hashtable[string, int])
+//	ht3.Add("banana", 7)
+//
+//	// Condition function to include pairs from the second hashtable only if the value is greater than 7
+//	mergedHashtable := ht1.MergeManyFunc([]*Hashtable[string, int]{ht2, ht3}, func(i int, key string, value int) bool {
+//		return value > 7
+//	})
+func (hashtable *Hashtable[K, V]) MergeManyFunc(otherHashtables []*Hashtable[K, V], fn func(i int, key K, value V) bool) *Hashtable[K, V] {
+	for i, otherHashtable := range otherHashtables {
+		hashtable.MergeFunc(otherHashtable, func(key K, value V) bool {
+			return fn(i, key, value)
+		})
+	}
+	return hashtable
+}
+
 // Not checks if the given key is not present in the hashtable.
 // It returns true if the key is not found, and false if the key exists in the hashtable.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	result := newHashtable.Not("apple")  // Returns true if "apple" is not in the hashtable, false otherwise
 func (hashtable *Hashtable[K, V]) Not(key K) bool {
@@ -826,6 +858,7 @@ func (hashtable *Hashtable[K, V]) Not(key K) bool {
 // It takes a variadic number of keys as input and returns a slice of booleans indicating whether each key is not found in the hashtable.
 // For each key, if it is not present in the hashtable, the corresponding boolean in the returned slice is true. Otherwise, it is false.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	results := newHashtable.NotMany("apple", "orange", "banana")
 //	// Returns a slice containing [true, true, false] indicating "apple" and "orange" are not in the hashtable, but "banana" is present
@@ -843,9 +876,10 @@ func (hashtable *Hashtable[K, V]) NotMany(keys ...K) *slice.Slice[bool] {
 // If the key is found in the hashtable, the corresponding value is returned. If the key is not present,
 // the zero value for the value type is returned.
 //
-//	ht := make(Hashtable[string, int])
-//	ht.Add("apple", 5)
-//	removedValue := ht.Pop("apple")  // Removes the key "apple" and returns its associated value 5, or 0 if "apple" is not found
+//	// Create a new Hashtable instance.
+//	newHashtable := make(Hashtable[string, int])
+//	newHashtable.Add("apple", 5)
+//	removedValue := newHashtable.Pop("apple")  // Removes the key "apple" and returns its associated value 5, or 0 if "apple" is not found
 func (hashtable *Hashtable[K, V]) Pop(key K) V {
 	value, _ := hashtable.PopOK(key)
 	return value
@@ -856,6 +890,7 @@ func (hashtable *Hashtable[K, V]) Pop(key K) V {
 // If the key is present in the hashtable, the corresponding value is returned, and the key-value pair is deleted.
 // If the key is not found, it returns the zero value for the value type and false.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	newHashtable.Add("apple", 5)
 //	removedValue, ok := newHashtable.PopOK("apple")  // Removes the key "apple" and returns its associated value 5, ok is true
@@ -873,6 +908,7 @@ func (hashtable *Hashtable[K, V]) PopOK(key K) (V, bool) {
 // It returns a slice containing the removed values and does not guarantee any specific order of values in the result.
 // If a key is not found in the hashtable, the corresponding value in the result slice will be the zero value for the value type.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	newHashtable.Add("apple", 5)
 //	newHashtable.Add("banana", 3)
@@ -892,6 +928,7 @@ func (hashtable *Hashtable[K, V]) PopMany(keys ...K) *slice.Slice[V] {
 // It takes a condition function as input and removes key-value pairs for which the function evaluates to true.
 // It returns a slice containing the removed values.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	newHashtable.Add("apple", 5)
 //	newHashtable.Add("orange", 10)
@@ -975,6 +1012,7 @@ func (hashtable *Hashtable[K, V]) Values() *slice.Slice[V] {
 // The condition function takes a key-value pair as input and returns true if the pair meets the condition, false otherwise.
 // It iterates over the hashtable and includes the values in the returned slice for which the condition function evaluates to true.
 //
+//	// Create a new Hashtable instance.
 //	newHashtable := make(Hashtable[string, int])
 //	newHashtable.Add("apple", 5)
 //	newHashtable.Add("orange", 10)
