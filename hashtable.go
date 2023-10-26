@@ -6,7 +6,7 @@ import (
 	"github.com/lindsaygelle/slice"
 )
 
-// Hashtable represents a generic hash table that maps keys of type K to values of type V. It provides efficient key-value storage and retrieval operations.
+// Hashtable represents a generic hash table that maps keys of type K to values of type V.
 type Hashtable[K comparable, V any] map[K]V
 
 // Add inserts a new key-value pair into the hashtable or updates the existing value associated with the provided key.
