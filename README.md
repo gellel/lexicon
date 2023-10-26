@@ -1,7 +1,7 @@
 # Hashtable
-Hashtable is a [Go](https://github.com/golang/go) package that provides a generic hashtable with extended functionality. It abstracts common map operations, such as adding, deleting, iterating, and more, making it easier to work with maps in Go.
+Hashtable is a generic hash table implementation in [Go](https://github.com/golang/go), supporting dynamic key-value pairs of any data type. It offers essential operations like adding, deleting, and checking for key-value pairs, along with advanced functionalities such as iteration, merging, intersection, and conditional mapping. Its flexibility allows seamless manipulation and querying, making it a powerful tool for various applications.
 
-![Hashtable]()
+![Hashtable](https://repository-images.githubusercontent.com/192931263/82f0f49f-fe0c-46f7-b52d-d1ded90f4204)
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/lindsaygelle/hashtable)](https://pkg.go.dev/github.com/lindsaygelle/hashtable)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lindsaygelle/hashtable)](https://goreportcard.com/report/github.com/lindsaygelle/hashtable)
@@ -10,6 +10,30 @@ Hashtable is a [Go](https://github.com/golang/go) package that provides a generi
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 ## Features
+
+### 🔑 Key Operations
+
+Effortlessly manage key-value pairs by adding, deleting, and replacing them. Employ custom functions to pop values and make replacements seamlessly.
+
+### 🔍 Query Operations
+
+Determine key existence, retrieve corresponding values, and identify specific values within the hash table
+
+### 🔄 Iteration
+
+Navigate through keys and values smoothly, applying functions and breaking based on specified conditions.
+
+### 🔗 Set Operations
+
+Effortlessly compute intersections with other hash tables. Merge hash tables with ease and apply custom merging functions to create cohesive datasets.
+
+### 🎛️ Functional Operations
+
+Filter data based on conditions and map values efficiently using custom functions. Compare hash tables for equality or define your own custom equality functions to ensure accurate results.
+
+### 🛠️ Convenience Functions
+
+Retrieve keys or values as slices for easy handling. Quickly check hash table emptiness, presence, and retrieve its length.
 
 ## Installation
 You can install it in your Go project using `go get`:
@@ -750,3 +774,4 @@ If you discover a security vulnerability within this project, please consult the
 This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct). For additional information, please review the [CODE_OF_CONDUCT](./CODE_OF_CONDUCT.md) file.
 
 ## Acknowledgements
+Big thanks to [egonelbre/gophers](https://github.com/egonelbre/gophers) for providing the delightful Gopher artwork used in the social preview. Don't hesitate to pay them a visit!
