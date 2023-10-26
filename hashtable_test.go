@@ -389,7 +389,7 @@ func TestDeleteMany(t *testing.T) {
 	expected := &slice.Slice[string]{"orange"}
 	result := ht.Keys()
 
-	if !result.Equal(expected) {
+	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expected keys %v after deleting 'apple' and 'banana', but got keys %v", expected, result)
 	}
 }
@@ -652,6 +652,42 @@ func TestEachValueBreak(t *testing.T) {
 		if value != expectedValues[i] {
 			t.Fatalf("Expected value %d at index %d, but got %d", expectedValues[i], i, value)
 		}
+	}
+}
+
+// TestEmptyInto tests Hashtable.EmptyInto.
+func TestEmptyInto(t *testing.T) {
+	// Test case 1: Transfer from an empty hashtable to another empty hashtable.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create an empty source hashtable.
+	ht2 := &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht1.EmptyInto(ht2)                         // Transfer from ht1 to ht2.
+
+	// Verify that ht1 is empty.
+	if ht1.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht1.Length())
+	}
+
+	// Verify that ht2 is still empty.
+	if ht2.Length() != 0 {
+		t.Errorf("Expected destination hashtable to be empty after transfer, but it has %d items", ht2.Length())
+	}
+
+	// Test case 2: Transfer from a non-empty hashtable to an empty hashtable.
+	ht1 = &hashtable.Hashtable[string, int]{} // Create an empty source hashtable.
+	ht1.Add("apple", 5)
+	ht2 = &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht1.EmptyInto(ht2)                        // Transfer from ht1 to ht2.
+
+	// Verify that ht1 is empty.
+	if ht1.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht1.Length())
+	}
+
+	// Verify that ht2 contains the transferred key-value pair.
+	expectedValue := 5
+	transferredValue, ok := ht2.Get("apple")
+	if !ok || transferredValue != expectedValue {
+		t.Errorf("Expected destination hashtable to contain 'apple': %d after transfer, but it contains '%d'", expectedValue, transferredValue)
 	}
 }
 
@@ -956,7 +992,7 @@ func TestIntersectionFunc(t *testing.T) {
 		"orange": 8,
 	}
 
-	if !newHashtable.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, newHashtable) {
 		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
 	}
 
@@ -974,7 +1010,7 @@ func TestIntersectionFunc(t *testing.T) {
 
 	expectedHashtable = &hashtable.Hashtable[string, int]{}
 
-	if !newHashtable.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, newHashtable) {
 		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
 	}
 
@@ -986,7 +1022,7 @@ func TestIntersectionFunc(t *testing.T) {
 
 	expectedHashtable = &hashtable.Hashtable[string, int]{}
 
-	if !newHashtable.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
 		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
 	}
 }
@@ -1139,7 +1175,7 @@ func TestMerge(t *testing.T) {
 	}
 
 	// Verify that ht1 is equal to the expected hashtable.
-	if !ht1.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
 		t.Errorf("Merge did not produce the expected result. Got: %v, Expected: %v", ht1, expectedHashtable)
 	}
 }
@@ -1172,6 +1208,92 @@ func TestMergeFunc(t *testing.T) {
 	// Verify that ht1 is equal to the expected hashtable.
 	if !ht1.Equal(expectedHashtable) {
 		t.Errorf("MergeFunc did not produce the expected result. Got: %v, Expected: %v", ht1, expectedHashtable)
+	}
+}
+
+// TestMergeMany tests Hashtable.MergeMany.
+func TestMergeMany(t *testing.T) {
+	// Create hashtables for merging.
+	ht1 := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 10,
+	}
+	ht2 := &hashtable.Hashtable[string, int]{
+		"orange": 15,
+		"banana": 7,
+	}
+	ht3 := &hashtable.Hashtable[string, int]{
+		"grape": 8,
+		"melon": 12,
+	}
+
+	// Merge key-value pairs from ht2 and ht3 into ht1.
+	ht1.MergeMany(ht2, ht3)
+
+	// Expected merged hashtable.
+	expectedHashtable := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 15,
+		"banana": 7,
+		"grape":  8,
+		"melon":  12,
+	}
+
+	// Check if the merged hashtable matches the expected hashtable.
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
+		t.Errorf("Merged hashtable does not match the expected hashtable. Got: %v, Expected: %v", ht1, expectedHashtable)
+	}
+
+	// Test case for merging an empty hashtable.
+	emptyHashtable := &hashtable.Hashtable[string, int]{}
+	ht1.MergeMany(emptyHashtable)
+
+	// Merged hashtable should remain unchanged.
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
+		t.Errorf("Merged hashtable should remain unchanged after merging with an empty hashtable. Got: %v, Expected: %v", ht1, expectedHashtable)
+	}
+}
+
+// TestMergeManyFunc tests Hashtable.MergeManyFunc.
+func TestMergeManyFunc(t *testing.T) {
+	// Test case: Merge key-value pairs based on a condition function.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht2 := &hashtable.Hashtable[string, int]{} // Create the first source hashtable.
+	ht2.Add("apple", 5)
+	ht3 := &hashtable.Hashtable[string, int]{} // Create the second source hashtable.
+	ht3.Add("orange", 10)
+	ht4 := &hashtable.Hashtable[string, int]{} // Create the third source hashtable.
+	ht4.Add("banana", 7)
+
+	// Condition function to include pairs only if the value is greater than 7.
+	conditionFunc := func(i int, key string, value int) bool {
+		return value >= 7
+	}
+
+	// Merge key-value pairs based on the condition function.
+	mergedHashtable := ht1.MergeManyFunc([]*hashtable.Hashtable[string, int]{ht2, ht3, ht4}, conditionFunc)
+
+	// Verify that the merged hashtable contains the expected key-value pairs.
+	expectedPairs := map[string]int{
+		"orange": 10,
+		"banana": 7,
+	}
+	for key, expectedValue := range expectedPairs {
+		value, ok := mergedHashtable.Get(key)
+		if !ok || value != expectedValue {
+			t.Errorf("Expected merged hashtable to contain key '%s': %d, but it contains '%d'", key, expectedValue, value)
+		}
+	}
+
+	// Verify that unwanted pairs are not present in the merged hashtable.
+	unwantedPairs := map[string]int{
+		"apple": 5,
+	}
+	for key := range unwantedPairs {
+		_, ok := mergedHashtable.Get(key)
+		if ok {
+			t.Errorf("Expected merged hashtable not to contain key '%s', but it was found", key)
+		}
 	}
 }
 
@@ -1210,7 +1332,45 @@ func TestNot(t *testing.T) {
 func TestPop(t *testing.T) {
 	// Test case 1: Pop from an empty hashtable.
 	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
-	removedValue, ok := ht.Pop("apple")
+	removedValue := ht.Pop("apple")
+	expectedValue := 0 // No key "apple" in the empty hashtable.
+
+	if removedValue != expectedValue {
+		t.Errorf("Expected removed value to be %d, but got %d", expectedValue, removedValue)
+	}
+
+	// Test case 2: Pop from a non-empty hashtable where the key is present.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	removedValue = ht.Pop("apple")
+	expectedValue = 5 // Key "apple" exists with value 5.
+
+	if removedValue != expectedValue {
+		t.Errorf("Expected removed value to be %d, but got %d", expectedValue, removedValue)
+	}
+	// Verify that the key is removed.
+	_, ok := ht.Get("apple")
+	if ok {
+		t.Errorf("Expected key 'apple' to be removed, but it was found")
+	}
+
+	// Test case 3: Pop from a non-empty hashtable where the key is not present.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	removedValue = ht.Pop("banana")
+	expectedValue = 0 // No key "banana" in the hashtable.
+
+	if removedValue != expectedValue {
+		t.Errorf("Expected removed value to be %d, but got %d", expectedValue, removedValue)
+	}
+}
+
+// TestPopOK tests Hashtable.PopOK.
+func TestPopOK(t *testing.T) {
+	// Test case 1: Pop from an empty hashtable.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	removedValue, ok := ht.PopOK("apple")
 	if ok || removedValue != 0 {
 		t.Errorf("Expected (0, false), but got (%d, %v)", removedValue, ok)
 	}
@@ -1218,7 +1378,7 @@ func TestPop(t *testing.T) {
 	// Test case 2: Pop from a non-empty hashtable where the key is present.
 	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
 	ht.Add("apple", 5)
-	removedValue, ok = ht.Pop("apple")
+	removedValue, ok = ht.PopOK("apple")
 	if !ok || removedValue != 5 {
 		t.Errorf("Expected (5, true), but got (%d, %v)", removedValue, ok)
 	}
@@ -1232,7 +1392,7 @@ func TestPop(t *testing.T) {
 	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
 	ht.Add("apple", 5)
 	ht.Add("orange", 10)
-	removedValue, ok = ht.Pop("banana")
+	removedValue, ok = ht.PopOK("banana")
 	if ok || removedValue != 0 {
 		t.Errorf("Expected (0, false), but got (%d, %v)", removedValue, ok)
 	}
@@ -1276,6 +1436,65 @@ func TestPopMany(t *testing.T) {
 	}
 }
 
+// TestPopManyFunc tests Hashtable.PopManyFunc.
+func TestPopManyFunc(t *testing.T) {
+	// Test case 1: Pop values greater than 7 from the hashtable.
+	ht := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 10,
+		"banana": 8,
+		"grape":  12,
+	}
+
+	removeCondition := func(key string, value int) bool {
+		return value > 7
+	}
+
+	removedValues := ht.PopManyFunc(removeCondition)
+
+	sort.Ints(*removedValues)
+
+	expectedRemovedValues := &slice.Slice[int]{8, 10, 12}
+
+	if !reflect.DeepEqual(expectedRemovedValues, removedValues) {
+		t.Errorf("Expected removed values to be %v, but got %v", expectedRemovedValues, removedValues)
+	}
+
+	// Test case 2: Pop values when condition does not match any key-value pairs.
+	ht = &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 3,
+		"banana": 8,
+	}
+
+	removeCondition = func(key string, value int) bool {
+		return value > 10
+	}
+
+	removedValues = ht.PopManyFunc(removeCondition)
+
+	expectedRemovedValues = &slice.Slice[int]{} // No values match the condition.
+
+	if !reflect.DeepEqual(expectedRemovedValues, removedValues) {
+		t.Errorf("Expected removed values to be %v, but got %v", expectedRemovedValues, removedValues)
+	}
+
+	// Test case 3: Pop values from an empty hashtable.
+	ht = &hashtable.Hashtable[string, int]{}
+
+	removeCondition = func(key string, value int) bool {
+		return value > 0
+	}
+
+	removedValues = ht.PopManyFunc(removeCondition)
+
+	expectedRemovedValues = &slice.Slice[int]{} // No values to remove from an empty hashtable.
+
+	if !reflect.DeepEqual(expectedRemovedValues, removedValues) {
+		t.Errorf("Expected removed values to be %v, but got %v", expectedRemovedValues, removedValues)
+	}
+}
+
 // TestReplaceMany tests Hashtable.ReplaceMany.
 func TestUpdate(t *testing.T) {
 	// Test case 1: Replace with an empty hashtable and a function that never modifies any pairs.
@@ -1316,6 +1535,42 @@ func TestUpdate(t *testing.T) {
 	expected = &hashtable.Hashtable[string, int]{"apple": 10, "orange": 10} // Expected modified hashtable.
 	if !reflect.DeepEqual(ht, expected) {
 		t.Errorf("Expected %v, but got %v", expected, ht)
+	}
+}
+
+// TestTakeFrom tests Hashtable.TakeFrom.
+func TestTakeFrom(t *testing.T) {
+	// Test case 1: Transfer from an empty hashtable to another empty hashtable.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht2 := &hashtable.Hashtable[string, int]{} // Create an empty source hashtable.
+	ht1.TakeFrom(ht2)                          // Transfer from ht2 to ht1.
+
+	// Verify that ht1 is still empty.
+	if ht1.Length() != 0 {
+		t.Errorf("Expected destination hashtable to be empty after transfer, but it has %d items", ht1.Length())
+	}
+
+	// Verify that ht2 is still empty.
+	if ht2.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht2.Length())
+	}
+
+	// Test case 2: Transfer from a non-empty hashtable to an empty hashtable.
+	ht1 = &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht2 = &hashtable.Hashtable[string, int]{} // Create a source hashtable.
+	ht2.Add("orange", 10)
+	ht1.TakeFrom(ht2) // Transfer from ht2 to ht1.
+
+	// Verify that ht1 contains the transferred key-value pair.
+	expectedValue := 10
+	transferredValue, ok := ht1.Get("orange")
+	if !ok || transferredValue != expectedValue {
+		t.Errorf("Expected destination hashtable to contain 'orange': %d after transfer, but it contains '%d'", expectedValue, transferredValue)
+	}
+
+	// Verify that ht2 is empty after transfer.
+	if ht2.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht2.Length())
 	}
 }
 
