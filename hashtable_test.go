@@ -389,7 +389,7 @@ func TestDeleteMany(t *testing.T) {
 	expected := &slice.Slice[string]{"orange"}
 	result := ht.Keys()
 
-	if !result.Equal(expected) {
+	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expected keys %v after deleting 'apple' and 'banana', but got keys %v", expected, result)
 	}
 }
@@ -956,7 +956,7 @@ func TestIntersectionFunc(t *testing.T) {
 		"orange": 8,
 	}
 
-	if !newHashtable.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, newHashtable) {
 		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
 	}
 
@@ -974,7 +974,7 @@ func TestIntersectionFunc(t *testing.T) {
 
 	expectedHashtable = &hashtable.Hashtable[string, int]{}
 
-	if !newHashtable.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, newHashtable) {
 		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
 	}
 
@@ -986,7 +986,7 @@ func TestIntersectionFunc(t *testing.T) {
 
 	expectedHashtable = &hashtable.Hashtable[string, int]{}
 
-	if !newHashtable.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
 		t.Errorf("Expected intersection result to be %v, but got %v", expectedHashtable, newHashtable)
 	}
 }
@@ -1139,7 +1139,7 @@ func TestMerge(t *testing.T) {
 	}
 
 	// Verify that ht1 is equal to the expected hashtable.
-	if !ht1.Equal(expectedHashtable) {
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
 		t.Errorf("Merge did not produce the expected result. Got: %v, Expected: %v", ht1, expectedHashtable)
 	}
 }
@@ -1172,6 +1172,49 @@ func TestMergeFunc(t *testing.T) {
 	// Verify that ht1 is equal to the expected hashtable.
 	if !ht1.Equal(expectedHashtable) {
 		t.Errorf("MergeFunc did not produce the expected result. Got: %v, Expected: %v", ht1, expectedHashtable)
+	}
+}
+
+// TestMergeMany tests Hashtable.MergeMany.
+func TestMergeMany(t *testing.T) {
+	// Create hashtables for merging.
+	ht1 := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 10,
+	}
+	ht2 := &hashtable.Hashtable[string, int]{
+		"orange": 15,
+		"banana": 7,
+	}
+	ht3 := &hashtable.Hashtable[string, int]{
+		"grape": 8,
+		"melon": 12,
+	}
+
+	// Merge key-value pairs from ht2 and ht3 into ht1.
+	ht1.MergeMany(ht2, ht3)
+
+	// Expected merged hashtable.
+	expectedHashtable := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 15,
+		"banana": 7,
+		"grape":  8,
+		"melon":  12,
+	}
+
+	// Check if the merged hashtable matches the expected hashtable.
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
+		t.Errorf("Merged hashtable does not match the expected hashtable. Got: %v, Expected: %v", ht1, expectedHashtable)
+	}
+
+	// Test case for merging an empty hashtable.
+	emptyHashtable := &hashtable.Hashtable[string, int]{}
+	ht1.MergeMany(emptyHashtable)
+
+	// Merged hashtable should remain unchanged.
+	if !reflect.DeepEqual(expectedHashtable, ht1) {
+		t.Errorf("Merged hashtable should remain unchanged after merging with an empty hashtable. Got: %v, Expected: %v", ht1, expectedHashtable)
 	}
 }
 
@@ -1273,6 +1316,65 @@ func TestPopMany(t *testing.T) {
 	_, ok = ht.Get("grape")
 	if ok {
 		t.Errorf("Expected key 'grape' to be removed, but it was found")
+	}
+}
+
+// TestPopManyFunc tests Hashtable.PopManyFunc.
+func TestPopManyFunc(t *testing.T) {
+	// Test case 1: Pop values greater than 7 from the hashtable.
+	ht := &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 10,
+		"banana": 8,
+		"grape":  12,
+	}
+
+	removeCondition := func(key string, value int) bool {
+		return value > 7
+	}
+
+	removedValues := ht.PopManyFunc(removeCondition)
+
+	sort.Ints(*removedValues)
+
+	expectedRemovedValues := &slice.Slice[int]{8, 10, 12}
+
+	if !reflect.DeepEqual(expectedRemovedValues, removedValues) {
+		t.Errorf("Expected removed values to be %v, but got %v", expectedRemovedValues, removedValues)
+	}
+
+	// Test case 2: Pop values when condition does not match any key-value pairs.
+	ht = &hashtable.Hashtable[string, int]{
+		"apple":  5,
+		"orange": 3,
+		"banana": 8,
+	}
+
+	removeCondition = func(key string, value int) bool {
+		return value > 10
+	}
+
+	removedValues = ht.PopManyFunc(removeCondition)
+
+	expectedRemovedValues = &slice.Slice[int]{} // No values match the condition.
+
+	if !reflect.DeepEqual(expectedRemovedValues, removedValues) {
+		t.Errorf("Expected removed values to be %v, but got %v", expectedRemovedValues, removedValues)
+	}
+
+	// Test case 3: Pop values from an empty hashtable.
+	ht = &hashtable.Hashtable[string, int]{}
+
+	removeCondition = func(key string, value int) bool {
+		return value > 0
+	}
+
+	removedValues = ht.PopManyFunc(removeCondition)
+
+	expectedRemovedValues = &slice.Slice[int]{} // No values to remove from an empty hashtable.
+
+	if !reflect.DeepEqual(expectedRemovedValues, removedValues) {
+		t.Errorf("Expected removed values to be %v, but got %v", expectedRemovedValues, removedValues)
 	}
 }
 
