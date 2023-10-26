@@ -396,6 +396,23 @@ func (hashtable *Hashtable[K, V]) EachValueBreak(fn func(value V) bool) *Hashtab
 	})
 }
 
+// EmptyInto transfers all key-value pairs from the current hashtable into another hashtable, emptying the current hashtable.
+// It takes another hashtable as input and adds all key-value pairs from the current hashtable to the other hashtable.
+//
+//	// Create a new Hashtable instance.
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	// Create a new Hashtable instance.
+//	ht2 := make(Hashtable[string, int])
+//
+//	ht1.EmptyInto(ht2)  // Transfers "apple": 5 from ht1 to ht2, leaving ht1 empty
+func (hashtable *Hashtable[K, V]) EmptyInto(otherHashtable *Hashtable[K, V]) *Hashtable[K, V] {
+	hashtable.Each(func(key K, value V) {
+		otherHashtable.Add(key, hashtable.Pop(key))
+	})
+	return hashtable
+}
+
 // Equal checks if the current hashtable is equal to another hashtable by comparing the key-value pairs directly using reflect.DeepEqual.
 // It takes another hashtable as input and returns true if the two hashtables are equal, false otherwise.
 //
@@ -822,16 +839,28 @@ func (hashtable *Hashtable[K, V]) NotMany(keys ...K) *slice.Slice[bool] {
 	return &values
 }
 
-// Pop removes a key-value pair from the hashtable based on the provided key.
+// Pop removes a key-value pair from the hashtable based on the provided key and returns the removed value.
+// If the key is found in the hashtable, the corresponding value is returned. If the key is not present,
+// the zero value for the value type is returned.
+//
+//	ht := make(Hashtable[string, int])
+//	ht.Add("apple", 5)
+//	removedValue := ht.Pop("apple")  // Removes the key "apple" and returns its associated value 5, or 0 if "apple" is not found
+func (hashtable *Hashtable[K, V]) Pop(key K) V {
+	value, _ := hashtable.PopOK(key)
+	return value
+}
+
+// PopOK removes a key-value pair from the hashtable based on the provided key.
 // It returns the removed value and a boolean indicating whether the key was found and removed successfully.
 // If the key is present in the hashtable, the corresponding value is returned, and the key-value pair is deleted.
 // If the key is not found, it returns the zero value for the value type and false.
 //
 //	newHashtable := make(Hashtable[string, int])
 //	newHashtable.Add("apple", 5)
-//	removedValue, ok := newHashtable.Pop("apple")  // Removes the key "apple" and returns its associated value 5, ok is true
-//	removedValue, ok = newHashtable.Pop("banana")   // Key "banana" not found, removedValue is 0 and ok is false
-func (hashtable *Hashtable[K, V]) Pop(key K) (V, bool) {
+//	removedValue, ok := newHashtable.PopOK("apple")  // Removes the key "apple" and returns its associated value 5, ok is true
+//	removedValue, ok = newHashtable.PopOK("banana")   // Key "banana" not found, removedValue is 0 and ok is false
+func (hashtable *Hashtable[K, V]) PopOK(key K) (V, bool) {
 	value, ok := hashtable.Get(key)
 	if ok {
 		ok = hashtable.DeleteOK(key)
@@ -851,7 +880,7 @@ func (hashtable *Hashtable[K, V]) Pop(key K) (V, bool) {
 func (hashtable *Hashtable[K, V]) PopMany(keys ...K) *slice.Slice[V] {
 	values := make(slice.Slice[V], 0)
 	for _, key := range keys {
-		value, ok := hashtable.Pop(key)
+		value, ok := hashtable.PopOK(key)
 		if ok {
 			values.Append(value)
 		}
@@ -874,7 +903,7 @@ func (hashtable *Hashtable[K, V]) PopManyFunc(fn func(key K, value V) bool) *sli
 	values := make(slice.Slice[V], 0)
 	hashtable.Each(func(key K, value V) {
 		if fn(key, value) {
-			removedValue, _ := hashtable.Pop(key)
+			removedValue := hashtable.Pop(key)
 			values.Append(removedValue)
 		}
 	})
@@ -903,6 +932,24 @@ func (hashtable *Hashtable[K, V]) ReplaceMany(fn func(key K, value V) (V, bool))
 			hashtable.Add(key, updatedValue)
 		}
 	}
+	return hashtable
+}
+
+// TakeFrom transfers all key-value pairs from another hashtable into the current hashtable, emptying the other hashtable.
+// It takes another hashtable as input and adds all key-value pairs from the other hashtable to the current hashtable.
+//
+//	// Create a new Hashtable instance.
+//	ht1 := make(Hashtable[string, int])
+//	ht1.Add("apple", 5)
+//	// Create a new Hashtable instance.
+//	ht2 := make(Hashtable[string, int])
+//	ht2.Add("orange", 10)
+//
+//	ht1.TakeFrom(ht2)  // Transfers "orange": 10 from ht2 to ht1, leaving ht2 empty
+func (hashtable *Hashtable[K, V]) TakeFrom(otherHashtable *Hashtable[K, V]) *Hashtable[K, V] {
+	otherHashtable.Each(func(key K, value V) {
+		hashtable.Add(key, otherHashtable.Pop(key))
+	})
 	return hashtable
 }
 

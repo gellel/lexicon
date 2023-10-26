@@ -655,6 +655,42 @@ func TestEachValueBreak(t *testing.T) {
 	}
 }
 
+// TestEmptyInto tests Hashtable.EmptyInto.
+func TestEmptyInto(t *testing.T) {
+	// Test case 1: Transfer from an empty hashtable to another empty hashtable.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create an empty source hashtable.
+	ht2 := &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht1.EmptyInto(ht2)                         // Transfer from ht1 to ht2.
+
+	// Verify that ht1 is empty.
+	if ht1.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht1.Length())
+	}
+
+	// Verify that ht2 is still empty.
+	if ht2.Length() != 0 {
+		t.Errorf("Expected destination hashtable to be empty after transfer, but it has %d items", ht2.Length())
+	}
+
+	// Test case 2: Transfer from a non-empty hashtable to an empty hashtable.
+	ht1 = &hashtable.Hashtable[string, int]{} // Create an empty source hashtable.
+	ht1.Add("apple", 5)
+	ht2 = &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht1.EmptyInto(ht2)                        // Transfer from ht1 to ht2.
+
+	// Verify that ht1 is empty.
+	if ht1.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht1.Length())
+	}
+
+	// Verify that ht2 contains the transferred key-value pair.
+	expectedValue := 5
+	transferredValue, ok := ht2.Get("apple")
+	if !ok || transferredValue != expectedValue {
+		t.Errorf("Expected destination hashtable to contain 'apple': %d after transfer, but it contains '%d'", expectedValue, transferredValue)
+	}
+}
+
 // TestEqual tests Hashtable.Equal.
 func TestEqual(t *testing.T) {
 	// Test case 1: Compare equal hashtables.
@@ -1253,7 +1289,45 @@ func TestNot(t *testing.T) {
 func TestPop(t *testing.T) {
 	// Test case 1: Pop from an empty hashtable.
 	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
-	removedValue, ok := ht.Pop("apple")
+	removedValue := ht.Pop("apple")
+	expectedValue := 0 // No key "apple" in the empty hashtable.
+
+	if removedValue != expectedValue {
+		t.Errorf("Expected removed value to be %d, but got %d", expectedValue, removedValue)
+	}
+
+	// Test case 2: Pop from a non-empty hashtable where the key is present.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	removedValue = ht.Pop("apple")
+	expectedValue = 5 // Key "apple" exists with value 5.
+
+	if removedValue != expectedValue {
+		t.Errorf("Expected removed value to be %d, but got %d", expectedValue, removedValue)
+	}
+	// Verify that the key is removed.
+	_, ok := ht.Get("apple")
+	if ok {
+		t.Errorf("Expected key 'apple' to be removed, but it was found")
+	}
+
+	// Test case 3: Pop from a non-empty hashtable where the key is not present.
+	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	ht.Add("apple", 5)
+	ht.Add("orange", 10)
+	removedValue = ht.Pop("banana")
+	expectedValue = 0 // No key "banana" in the hashtable.
+
+	if removedValue != expectedValue {
+		t.Errorf("Expected removed value to be %d, but got %d", expectedValue, removedValue)
+	}
+}
+
+// TestPopOK tests Hashtable.PopOK.
+func TestPopOK(t *testing.T) {
+	// Test case 1: Pop from an empty hashtable.
+	ht := &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
+	removedValue, ok := ht.PopOK("apple")
 	if ok || removedValue != 0 {
 		t.Errorf("Expected (0, false), but got (%d, %v)", removedValue, ok)
 	}
@@ -1261,7 +1335,7 @@ func TestPop(t *testing.T) {
 	// Test case 2: Pop from a non-empty hashtable where the key is present.
 	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
 	ht.Add("apple", 5)
-	removedValue, ok = ht.Pop("apple")
+	removedValue, ok = ht.PopOK("apple")
 	if !ok || removedValue != 5 {
 		t.Errorf("Expected (5, true), but got (%d, %v)", removedValue, ok)
 	}
@@ -1275,7 +1349,7 @@ func TestPop(t *testing.T) {
 	ht = &hashtable.Hashtable[string, int]{} // Create an empty hashtable.
 	ht.Add("apple", 5)
 	ht.Add("orange", 10)
-	removedValue, ok = ht.Pop("banana")
+	removedValue, ok = ht.PopOK("banana")
 	if ok || removedValue != 0 {
 		t.Errorf("Expected (0, false), but got (%d, %v)", removedValue, ok)
 	}
@@ -1418,6 +1492,42 @@ func TestUpdate(t *testing.T) {
 	expected = &hashtable.Hashtable[string, int]{"apple": 10, "orange": 10} // Expected modified hashtable.
 	if !reflect.DeepEqual(ht, expected) {
 		t.Errorf("Expected %v, but got %v", expected, ht)
+	}
+}
+
+// TestTakeFrom tests Hashtable.TakeFrom.
+func TestTakeFrom(t *testing.T) {
+	// Test case 1: Transfer from an empty hashtable to another empty hashtable.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht2 := &hashtable.Hashtable[string, int]{} // Create an empty source hashtable.
+	ht1.TakeFrom(ht2)                          // Transfer from ht2 to ht1.
+
+	// Verify that ht1 is still empty.
+	if ht1.Length() != 0 {
+		t.Errorf("Expected destination hashtable to be empty after transfer, but it has %d items", ht1.Length())
+	}
+
+	// Verify that ht2 is still empty.
+	if ht2.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht2.Length())
+	}
+
+	// Test case 2: Transfer from a non-empty hashtable to an empty hashtable.
+	ht1 = &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht2 = &hashtable.Hashtable[string, int]{} // Create a source hashtable.
+	ht2.Add("orange", 10)
+	ht1.TakeFrom(ht2) // Transfer from ht2 to ht1.
+
+	// Verify that ht1 contains the transferred key-value pair.
+	expectedValue := 10
+	transferredValue, ok := ht1.Get("orange")
+	if !ok || transferredValue != expectedValue {
+		t.Errorf("Expected destination hashtable to contain 'orange': %d after transfer, but it contains '%d'", expectedValue, transferredValue)
+	}
+
+	// Verify that ht2 is empty after transfer.
+	if ht2.Length() != 0 {
+		t.Errorf("Expected source hashtable to be empty after transfer, but it has %d items", ht2.Length())
 	}
 }
 
