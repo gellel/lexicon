@@ -1,9 +1,9 @@
 version: "3"
 
 services:
-  hashtable:
+  gomap:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: hashtable
-    image: hashtable:latest
+    container_name: gomap
+    image: gomap:latest

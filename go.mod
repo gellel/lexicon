@@ -1,4 +1,4 @@
-module github.com/lindsaygelle/hashtable
+module github.com/lindsaygelle/gomap
 
 go 1.21
 
