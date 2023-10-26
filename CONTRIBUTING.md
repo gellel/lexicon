@@ -17,8 +17,8 @@ Reporting An Issue/Feature
 --------------------------
 First, check to see if there's an existing issue/pull request for the
 bug/feature. All issues are at
-https://github.com/lindsaygelle/hashtable/issues and pull reqs are at
-https://github.com/lindsaygelle/hashtable/pulls.
+https://github.com/lindsaygelle/gomap/issues and pull reqs are at
+https://github.com/lindsaygelle/gomap/pulls.
 
 If there isn't an existing issue there, please file an issue. The
 ideal report includes:
@@ -28,7 +28,7 @@ ideal report includes:
 -  If relevant, including the versions of your:
 
    -  Go language
-   -  hashtable
+   -  gomap
    -  Optionally of the other dependencies involved
 
 -  If possible, create a pull request with a (failing) test case

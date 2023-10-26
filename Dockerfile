@@ -16,7 +16,7 @@ RUN wget -q https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Set the working directory
-WORKDIR /go/src/github.com/lindsaygelle/hashtable
+WORKDIR /go/src/github.com/lindsaygelle/gomap
 
 # Copy the application source code into the container
 COPY . .

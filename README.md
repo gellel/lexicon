@@ -1,12 +1,12 @@
-# Hashtable
-Hashtable is a generic hash table implementation in [Go](https://github.com/golang/go), supporting dynamic key-value pairs of any data type. It offers essential operations like adding, deleting, and checking for key-value pairs, along with advanced functionalities such as iteration, merging, intersection, and conditional mapping. Its flexibility allows seamless manipulation and querying, making it a powerful tool for various applications.
+# Gomap
+Gomap is a generic map implementation in [Go](https://github.com/golang/go), supporting dynamic key-value pairs of any data type. It offers essential operations like adding, deleting, and checking for key-value pairs, along with advanced functionalities such as iteration, merging, intersection, and conditional mapping. Its flexibility allows seamless manipulation and querying, making it a powerful tool for various applications.
 
-![Hashtable](https://repository-images.githubusercontent.com/192931263/82f0f49f-fe0c-46f7-b52d-d1ded90f4204)
+![Gomap](https://repository-images.githubusercontent.com/192931263/82f0f49f-fe0c-46f7-b52d-d1ded90f4204)
 
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/lindsaygelle/hashtable)](https://pkg.go.dev/github.com/lindsaygelle/hashtable)
-[![Go Report Card](https://goreportcard.com/badge/github.com/lindsaygelle/hashtable)](https://goreportcard.com/report/github.com/lindsaygelle/hashtable)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/lindsaygelle/hashtable)](https://github.com/lindsaygelle/hashtable/releases)
-[![GitHub](https://img.shields.io/github/license/lindsaygelle/hashtable)](LICENSE.txt)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/lindsaygelle/gomap)](https://pkg.go.dev/github.com/lindsaygelle/gomap)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lindsaygelle/gomap)](https://goreportcard.com/report/github.com/lindsaygelle/gomap)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/lindsaygelle/gomap)](https://github.com/lindsaygelle/gomap/releases)
+[![GitHub](https://img.shields.io/github/license/lindsaygelle/gomap)](LICENSE.txt)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 ## Features
@@ -39,7 +39,7 @@ Retrieve keys or values as slices for easy handling. Quickly check hash table em
 You can install it in your Go project using `go get`:
 
 ```sh
-go get github.com/lindsaygelle/hashtable
+go get github.com/lindsaygelle/gomap
 ```
 
 ## Usage
@@ -48,29 +48,29 @@ Import the package into your Go code:
 
 ```Go
 import (
-	"github.com/lindsaygelle/hashtable"
+	"github.com/lindsaygelle/gomap"
 )
 ```
 
 ## Methods
-Provided methods for `&hashtable.Hashtable[K]V`.
+Provided methods for `&gomap.Map[K]V`.
 
 ### Add
 Adds a key-value pair to the hash table and returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{}
-myHashtable.Add("key1", 1)
-myHashtable.Add("key2", 2)
-fmt.Println(myHashtable) // &map[key1:1 key2:2]
+myMap := &gomap.Map[string, int]{}
+myMap.Add("key1", 1)
+myMap.Add("key2", 2)
+fmt.Println(myMap) // &map[key1:1 key2:2]
 ```
 
 ### AddLength
 Adds a key-value pair to the hash table and returns the new length of the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{}
-length := myHashtable.AddLength("key1", 1)
+myMap := &gomap.Map[string, int]{}
+length := myMap.AddLength("key1", 1)
 fmt.Println(length) // 1
 ```
 
@@ -78,29 +78,29 @@ fmt.Println(length) // 1
 Adds multiple key-value pairs to the hash table and returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{}
-myHashtable.AddMany(map[string]int{"key1": 1, "key2": 2})
-fmt.Println(myHashtable) // &map[key1:1 key2:2]
+myMap := &gomap.Map[string, int]{}
+myMap.AddMany(map[string]int{"key1": 1, "key2": 2})
+fmt.Println(myMap) // &map[key1:1 key2:2]
 ```
 
 ### AddManyFunc
 Adds key-value pairs from a slice of maps to the hash table using a custom function and returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{}
+myMap := &gomap.Map[string, int]{}
 myMaps := []map[string]int{{"key1": 1}, {"key2": 2}}
-myHashtable.AddManyFunc(myMaps, func(i int, key string, value int) bool {
+myMap.AddManyFunc(myMaps, func(i int, key string, value int) bool {
     return true // Add all key-value pairs
 })
-fmt.Println(myHashtable) // &map[key1:1 key2:2]
+fmt.Println(myMap) // &map[key1:1 key2:2]
 ```
 
 ### AddManyOK
 Adds multiple key-value pairs to the hash table and returns a slice indicating successful additions.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{}
-results := myHashtable.AddManyOK(map[string]int{"key1": 1, "key2": 2})
+myMap := &gomap.Map[string, int]{}
+results := myMap.AddManyOK(map[string]int{"key1": 1, "key2": 2})
 fmt.Println(results) // &[true, true]
 ```
 
@@ -108,8 +108,8 @@ fmt.Println(results) // &[true, true]
 Adds a key-value pair to the hash table and returns true if the addition was successful, false otherwise.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{}
-added := myHashtable.AddOK("key1", 1)
+myMap := &gomap.Map[string, int]{}
+added := myMap.AddOK("key1", 1)
 fmt.Println(added) // true
 ```
 
@@ -117,8 +117,8 @@ fmt.Println(added) // true
 Checks if the given value is present in the hash table and returns the corresponding key along with a boolean indicating existence.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-key, exists := myHashtable.Contains(2)
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+key, exists := myMap.Contains(2)
 fmt.Println(key, exists) // key2 true
 ```
 
@@ -126,17 +126,17 @@ fmt.Println(key, exists) // key2 true
 Removes the specified key and its associated value from the hash table and returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.Delete("key1")
-fmt.Println(myHashtable) // &map[key2:2]
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.Delete("key1")
+fmt.Println(myMap) // &map[key2:2]
 ```
 
 ### DeleteLength
 Removes the specified key and its associated value from the hash table and returns the new length of the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-length := myHashtable.DeleteLength("key1")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+length := myMap.DeleteLength("key1")
 fmt.Println(length) // 1
 ```
 
@@ -144,28 +144,28 @@ fmt.Println(length) // 1
 Removes multiple keys and their associated values from the hash table and returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.DeleteMany("key1", "key2")
-fmt.Println(myHashtable) // &map[]
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.DeleteMany("key1", "key2")
+fmt.Println(myMap) // &map[]
 ```
 
 ### DeleteManyFunc
 Removes key-value pairs from the hash table using a custom function and returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.DeleteManyFunc(func(key string, value int) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.DeleteManyFunc(func(key string, value int) bool {
     return key == "key1"
 })
-fmt.Println(myHashtable) // &map[key2:2]
+fmt.Println(myMap) // &map[key2:2]
 ```
 
 ### DeleteManyOK
 Removes multiple keys and their associated values from the hash table and returns a slice indicating successful deletions.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-results := myHashtable.DeleteManyOK("key1", "key2")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+results := myMap.DeleteManyOK("key1", "key2")
 fmt.Println(results) // &[true, true]
 ```
 
@@ -173,17 +173,17 @@ fmt.Println(results) // &[true, true]
 Removes multiple values from the hash table and returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.DeleteManyValues(1, 2)
-fmt.Println(myHashtable) // &map[]
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.DeleteManyValues(1, 2)
+fmt.Println(myMap) // &map[]
 ```
 
 ### DeleteOK
 Removes the specified key and its associated value from the hash table and returns true if the deletion was successful, false otherwise.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-deleted := myHashtable.DeleteOK("key1")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+deleted := myMap.DeleteOK("key1")
 fmt.Println(deleted) // true
 ```
 
@@ -191,8 +191,8 @@ fmt.Println(deleted) // true
 Applies the given function to each key-value pair in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.Each(func(key string, value int) {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.Each(func(key string, value int) {
     fmt.Println(key, value)
 })
 // Output:
@@ -204,8 +204,8 @@ myHashtable.Each(func(key string, value int) {
 Applies the given function to each key-value pair in the hash table and breaks the iteration if the function returns false.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.EachBreak(func(key string, value int) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.EachBreak(func(key string, value int) bool {
     fmt.Println(key, value)
     return key != "key1"
 })
@@ -217,8 +217,8 @@ myHashtable.EachBreak(func(key string, value int) bool {
 Applies the given function to each key in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.EachKey(func(key string) {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.EachKey(func(key string) {
     fmt.Println(key)
 })
 // Output:
@@ -230,8 +230,8 @@ myHashtable.EachKey(func(key string) {
 Applies the given function to each key in the hash table and breaks the iteration if the function returns false.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.EachKeyBreak(func(key string) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.EachKeyBreak(func(key string) bool {
     fmt.Println(key)
     return key != "key1"
 })
@@ -243,8 +243,8 @@ myHashtable.EachKeyBreak(func(key string) bool {
 Applies the given function to each value in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.EachValue(func(value int) {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.EachValue(func(value int) {
     fmt.Println(value)
 })
 // Output:
@@ -256,8 +256,8 @@ myHashtable.EachValue(func(value int) {
 Applies the given function to each value in the hash table and breaks the iteration if the function returns false.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.EachValueBreak(func(value int) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.EachValueBreak(func(value int) bool {
     fmt.Println(value)
     return value != 1
 })
@@ -269,8 +269,8 @@ myHashtable.EachValueBreak(func(value int) bool {
 Empties the current hash table and inserts its content into another hash table. It returns the updated destination hash table.
 
 ```Go
-source := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-destination := &hashtable.Hashtable[string, int]{"key3": 3}
+source := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+destination := &gomap.Map[string, int]{"key3": 3}
 destination = source.EmptyInto(destination)
 fmt.Println(destination) // &map[key1:1 key2:2]
 ```
@@ -279,9 +279,9 @@ fmt.Println(destination) // &map[key1:1 key2:2]
 Checks if the current hash table is equal to another hash table.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-isEqual := myHashtable1.Equal(myHashtable2)
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+isEqual := myMap1.Equal(myMap2)
 fmt.Println(isEqual) // true
 ```
 
@@ -289,9 +289,9 @@ fmt.Println(isEqual) // true
 Checks if the current hash table is equal to another hash table using a custom comparison function.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 4}
-isEqual := myHashtable1.EqualFunc(myHashtable2, func(a int, b int) bool {
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key1": 1, "key2": 4}
+isEqual := myMap1.EqualFunc(myMap2, func(a int, b int) bool {
     return a == b || a%2 == 0 && b%2 == 0
 })
 fmt.Println(isEqual) // true (custom comparison allows for even values)
@@ -301,9 +301,9 @@ fmt.Println(isEqual) // true (custom comparison allows for even values)
 Checks if the current hash table is equal in length to another hash table.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-isEqualLength := myHashtable1.EqualLength(myHashtable2)
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+isEqualLength := myMap1.EqualLength(myMap2)
 fmt.Println(isEqualLength) // false (different lengths)
 ```
 
@@ -311,8 +311,8 @@ fmt.Println(isEqualLength) // false (different lengths)
 Retrieves the value associated with the given key from the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-value := myHashtable.Fetch("key1")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+value := myMap.Fetch("key1")
 fmt.Println(value) // 1
 ```
 
@@ -320,8 +320,8 @@ fmt.Println(value) // 1
 Applies the given function to each key-value pair in the hash table and retains pairs for which the function returns true.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-filteredHashtable := myHashtable.Filter(func(key string, value int) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+filteredHashtable := myMap.Filter(func(key string, value int) bool {
     return value%2 == 0
 })
 fmt.Println(filteredHashtable) // &map[key2:2]
@@ -331,8 +331,8 @@ fmt.Println(filteredHashtable) // &map[key2:2]
 Retrieves the value associated with the given key from the hash table and returns it along with a boolean indicating existence.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-value, exists := myHashtable.Get("key2")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+value, exists := myMap.Get("key2")
 fmt.Println(value, exists) // 2 true
 ```
 
@@ -340,8 +340,8 @@ fmt.Println(value, exists) // 2 true
 Retrieves values associated with multiple keys from the hash table and returns them in a slice.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-values := myHashtable.GetMany("key1", "key3")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+values := myMap.GetMany("key1", "key3")
 fmt.Println(values) // &[1 3]
 ```
 
@@ -349,8 +349,8 @@ fmt.Println(values) // &[1 3]
 Checks if the given key is present in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-exists := myHashtable.Has("key1")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+exists := myMap.Has("key1")
 fmt.Println(exists) // true
 ```
 
@@ -358,8 +358,8 @@ fmt.Println(exists) // true
 Checks if multiple keys are present in the hash table and returns a slice indicating their existence.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-exists := myHashtable.HasMany("key1", "key4")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+exists := myMap.HasMany("key1", "key4")
 fmt.Println(exists) // &[true false]
 ```
 
@@ -367,9 +367,9 @@ fmt.Println(exists) // &[true false]
 Returns a new hash table containing key-value pairs that are present in both the current and another hash table.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key1": 1, "key3": 3}
-intersection := myHashtable1.Intersection(myHashtable2)
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key1": 1, "key3": 3}
+intersection := myMap1.Intersection(myMap2)
 fmt.Println(intersection) // &map[key1:1]
 ```
 
@@ -377,9 +377,9 @@ fmt.Println(intersection) // &map[key1:1]
 Returns a new hash table containing key-value pairs that are present in both the current and another hash table, determined by a custom function.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key1": 1, "key3": 3}
-intersection := myHashtable1.IntersectionFunc(myHashtable2, func(key string, a int, b int) bool {
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key1": 1, "key3": 3}
+intersection := myMap1.IntersectionFunc(myMap2, func(key string, a int, b int) bool {
     return a == b
 })
 fmt.Println(intersection) // &map[key1:1]
@@ -389,8 +389,8 @@ fmt.Println(intersection) // &map[key1:1]
 Checks if the hash table is empty.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{}
-isEmpty := myHashtable.IsEmpty()
+myMap := &gomap.Map[string, int]{}
+isEmpty := myMap.IsEmpty()
 fmt.Println(isEmpty) // true
 ```
 
@@ -398,8 +398,8 @@ fmt.Println(isEmpty) // true
 Checks if the hash table contains key-value pairs.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-isPopulated := myHashtable.IsPopulated()
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+isPopulated := myMap.IsPopulated()
 fmt.Println(isPopulated) // true
 ```
 
@@ -407,8 +407,8 @@ fmt.Println(isPopulated) // true
 Returns a slice containing all keys in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-keys := myHashtable.Keys()
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+keys := myMap.Keys()
 fmt.Println(keys) // &["key1" "key2"]
 ```
 
@@ -416,8 +416,8 @@ fmt.Println(keys) // &["key1" "key2"]
 Returns a slice containing keys that satisfy the given function.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-keys := myHashtable.KeysFunc(func(key string) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+keys := myMap.KeysFunc(func(key string) bool {
     return key != "key3"
 })
 fmt.Println(keys) // &["key1" "key2"]
@@ -427,8 +427,8 @@ fmt.Println(keys) // &["key1" "key2"]
 Returns the number of key-value pairs in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-length := myHashtable.Length()
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+length := myMap.Length()
 fmt.Println(length) // 2
 ```
 
@@ -436,31 +436,31 @@ fmt.Println(length) // 2
 Applies the given function to each key-value pair in the hash table and replaces the value with the result of the function.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.Map(func(key string, value int) int {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.Map(func(key string, value int) int {
     return value * 2
 })
-fmt.Println(myHashtable) // &map[key1:2 key2:4]
+fmt.Println(myMap) // &map[key1:2 key2:4]
 ```
 
 ### MapBreak
 Applies the given function to each key-value pair in the hash table and replaces the value with the result of the function. It breaks the iteration if the function returns false.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable.MapBreak(func(key string, value int) (int, bool) {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap.MapBreak(func(key string, value int) (int, bool) {
     return value * 2, key != "key2"
 })
-fmt.Println(myHashtable) // &map[key1:2 key2:2]
+fmt.Println(myMap) // &map[key1:2 key2:2]
 ```
 
 ### Merge
 Merges the current hash table with another hash table and returns the updated hash table.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key2": 3, "key3": 4}
-mergedHashtable := myHashtable1.Merge(myHashtable2)
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key2": 3, "key3": 4}
+mergedHashtable := myMap1.Merge(myMap2)
 fmt.Println(mergedHashtable) // &map[key1:1 key2:3 key3:4]
 ```
 
@@ -468,9 +468,9 @@ fmt.Println(mergedHashtable) // &map[key1:1 key2:3 key3:4]
 Merges the current hash table with another hash table using a custom function and returns the updated hash table.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key2": 3, "key3": 4}
-mergedHashtable := myHashtable1.MergeFunc(myHashtable2, func(key string, value1 int, value2 int) bool {
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key2": 3, "key3": 4}
+mergedHashtable := myMap1.MergeFunc(myMap2, func(key string, value1 int, value2 int) bool {
     return value1 > value2
 })
 fmt.Println(mergedHashtable) // &map[key1:1 key2:2 key3:4]
@@ -480,9 +480,9 @@ fmt.Println(mergedHashtable) // &map[key1:1 key2:2 key3:4]
 Merges the current hash table with multiple other hash tables and returns the updated hash table.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key2": 3, "key3": 4}
-mergedHashtable := myHashtable1.MergeMany(myHashtable2, &hashtable.Hashtable[string, int]{"key4": 5})
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key2": 3, "key3": 4}
+mergedHashtable := myMap1.MergeMany(myMap2, &gomap.Map[string, int]{"key4": 5})
 fmt.Println(mergedHashtable) // &map[key1:1 key2:3 key3:4 key4:5]
 ```
 
@@ -490,9 +490,9 @@ fmt.Println(mergedHashtable) // &map[key1:1 key2:3 key3:4 key4:5]
 Merges the current hash table with multiple other hash tables using a custom function and returns the updated hash table.
 
 ```Go
-myHashtable1 := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-myHashtable2 := &hashtable.Hashtable[string, int]{"key2": 3, "key3": 4}
-mergedHashtable := myHashtable1.MergeManyFunc([]*hashtable.Hashtable[string, int]{myHashtable2}, func(i int, key string, value int) bool {
+myMap1 := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+myMap2 := &gomap.Map[string, int]{"key2": 3, "key3": 4}
+mergedHashtable := myMap1.MergeManyFunc([]*gomap.Map[string, int]{myMap2}, func(i int, key string, value int) bool {
     return key != "key3"
 })
 fmt.Println(mergedHashtable) // &map[key1:1 key2:3]
@@ -502,8 +502,8 @@ fmt.Println(mergedHashtable) // &map[key1:1 key2:3]
 Checks if the given key is not present in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-notPresent := myHashtable.Not("key3")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+notPresent := myMap.Not("key3")
 fmt.Println(notPresent) // true
 ```
 
@@ -511,8 +511,8 @@ fmt.Println(notPresent) // true
 Checks if multiple keys are not present in the hash table and returns a slice indicating their absence.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-absentKeys := myHashtable.NotMany("key3", "key4")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+absentKeys := myMap.NotMany("key3", "key4")
 fmt.Println(absentKeys) // &[true true]
 ```
 
@@ -520,64 +520,64 @@ fmt.Println(absentKeys) // &[true true]
 Removes the specified key and its associated value from the hash table and returns the value.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-value := myHashtable.Pop("key1")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+value := myMap.Pop("key1")
 fmt.Println(value) // 1
-fmt.Println(myHashtable) // &map[key2:2]
+fmt.Println(myMap) // &map[key2:2]
 ```
 
 ### PopMany
 Removes multiple keys and their associated values from the hash table and returns the values in a slice.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-values := myHashtable.PopMany("key1", "key3")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+values := myMap.PopMany("key1", "key3")
 fmt.Println(values) // &[1 3]
-fmt.Println(myHashtable) // &map[key2:2]
+fmt.Println(myMap) // &map[key2:2]
 ```
 
 ### PopManyFunc
 Removes key-value pairs from the hash table using a custom function and returns the values in a slice.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-values := myHashtable.PopManyFunc(func(key string, value int) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+values := myMap.PopManyFunc(func(key string, value int) bool {
     return key != "key2"
 })
 fmt.Println(values) // &[1 3]
-fmt.Println(myHashtable) // &map[key2:2]
+fmt.Println(myMap) // &map[key2:2]
 ```
 
 ### PopOK
 Removes the specified key and its associated value from the hash table and returns the value along with a boolean indicating existence.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-value, exists := myHashtable.PopOK("key1")
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+value, exists := myMap.PopOK("key1")
 fmt.Println(value, exists) // 1 true
-fmt.Println(myHashtable)  // &map[key2:2]
+fmt.Println(myMap)  // &map[key2:2]
 ```
 
 ### ReplaceMany
 Applies the given function to each key-value pair in the hash table and replaces the value if the function returns true. It returns the updated hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-myHashtable.ReplaceMany(func(key string, value int) (int, bool) {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+myMap.ReplaceMany(func(key string, value int) (int, bool) {
     if key == "key2" {
         return value * 2, true
     }
     return value, false
 })
-fmt.Println(myHashtable) // &map[key1:1 key2:4 key3:3]
+fmt.Println(myMap) // &map[key1:1 key2:4 key3:3]
 ```
 
 ### TakeFrom
 Empties the current hash table and inserts its content into another hash table. It returns the updated destination hash table.
 
 ```Go
-source := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-destination := &hashtable.Hashtable[string, int]{"key3": 3}
+source := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+destination := &gomap.Map[string, int]{"key3": 3}
 destination = source.TakeFrom(destination)
 fmt.Println(destination) // &map[key1:1 key2:2]
 ```
@@ -586,8 +586,8 @@ fmt.Println(destination) // &map[key1:1 key2:2]
 Returns a slice containing all values in the hash table.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2}
-values := myHashtable.Values()
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2}
+values := myMap.Values()
 fmt.Println(values) // &[1 2]
 ```
 
@@ -595,8 +595,8 @@ fmt.Println(values) // &[1 2]
 Returns a slice containing values that satisfy the given function.
 
 ```Go
-myHashtable := &hashtable.Hashtable[string, int]{"key1": 1, "key2": 2, "key3": 3}
-values := myHashtable.ValuesFunc(func(key string, value int) bool {
+myMap := &gomap.Map[string, int]{"key1": 1, "key2": 2, "key3": 3}
+values := myMap.ValuesFunc(func(key string, value int) bool {
     return value%2 == 0
 })
 fmt.Println(values) // &[2]
@@ -612,7 +612,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lindsaygelle/hashtable" // Import the hashtable package
+	"github.com/lindsaygelle/gomap" // Import the gomap package
 )
 
 type Animal struct {
@@ -625,52 +625,52 @@ func main() {
 	// Create a new Animal
 	fluffy := Animal{Age: 1, Name: "Fluffy", Species: "Cat"}
 
-	// Create a new Hashtable of Animals
-	animals := &hashtable.Hashtable[string, Animal]{}
+	// Create a new Map of Animals
+	animals := &gomap.Map[string, Animal]{}
 
-	// Add an Animal to the Hashtable using Add function
+	// Add an Animal to the Map using Add function
 	animals.Add(fluffy.Name, fluffy)
 
-	// Check if the Hashtable contains a specific key
+	// Check if the Map contains a specific key
 	if animals.Has("Fluffy") {
-		fmt.Println("Fluffy is in the Hashtable!")
+		fmt.Println("Fluffy is in the Map!")
 	}
 
 	// Get the value associated with a specific key
 	if animal, exists := animals.Get("Fluffy"); exists {
-		fmt.Println("Found Fluffy in the Hashtable:", animal)
+		fmt.Println("Found Fluffy in the Map:", animal)
 	}
 
 	// Update the age of Fluffy
 	updatedFluffy := Animal{Age: 2, Name: "Fluffy", Species: "Cat"}
 	animals.Add("Fluffy", updatedFluffy)
 
-	// Delete an entry from the Hashtable
+	// Delete an entry from the Map
 	animals.Delete("Fluffy")
 
 	// Add more animals after deleting Fluffy
 	animals.Add("Buddy", Animal{Age: 3, Name: "Buddy", Species: "Dog"})
 	animals.Add("Whiskers", Animal{Age: 2, Name: "Whiskers", Species: "Rabbit"})
 
-	// Iterate over the Hashtable and print each key-value pair
+	// Iterate over the Map and print each key-value pair
 	animals.Each(func(key string, value Animal) {
 		fmt.Println("Key:", key, "Value:", value)
 	})
 
-	// Check if the Hashtable is empty
+	// Check if the Map is empty
 	if animals.IsEmpty() {
-		fmt.Println("Hashtable is empty.")
+		fmt.Println("Map is empty.")
 	} else {
-		fmt.Println("Hashtable is not empty.")
+		fmt.Println("Map is not empty.")
 	}
 
-	// Get all keys from the Hashtable
+	// Get all keys from the Map
 	keys := animals.Keys().Slice()
-	fmt.Println("Keys in Hashtable:", keys)
+	fmt.Println("Keys in Map:", keys)
 
-	// Get all values from the Hashtable
+	// Get all values from the Map
 	values := animals.Values().Slice()
-	fmt.Println("Values in Hashtable:", values)
+	fmt.Println("Values in Map:", values)
 }
 ```
 
@@ -683,7 +683,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lindsaygelle/hashtable" // Import the hashtable package
+	"github.com/lindsaygelle/gomap" // Import the gomap package
 )
 
 type Animal struct {
@@ -693,18 +693,18 @@ type Animal struct {
 }
 
 func main() {
-	// Create a new Hashtable of Animals and add animals using method chaining
-	animals := &hashtable.Hashtable[string, Animal]{}.
+	// Create a new Map of Animals and add animals using method chaining
+	animals := &gomap.Map[string, Animal]{}.
 		Add("Fluffy", Animal{Age: 1, Name: "Fluffy", Species: "Cat"}).
 		Add("Buddy", Animal{Age: 3, Name: "Buddy", Species: "Dog"}).
 		Add("Whiskers", Animal{Age: 2, Name: "Whiskers", Species: "Rabbit"})
 
-	// Print the number of animals in the Hashtable using the Length() method
-	fmt.Println("Number of animals in the Hashtable:", animals.Length())
+	// Print the number of animals in the Map using the Length() method
+	fmt.Println("Number of animals in the Map:", animals.Length())
 
-	// Check if a specific animal is in the Hashtable using method chaining
+	// Check if a specific animal is in the Map using method chaining
 	if exists := animals.Has("Fluffy"); exists {
-		fmt.Println("Fluffy is in the Hashtable!")
+		fmt.Println("Fluffy is in the Map!")
 	}
 
 	// Retrieve and print the age of a specific animal using method chaining
@@ -712,7 +712,7 @@ func main() {
 		fmt.Println("Buddy's age is:", age.Age)
 	}
 
-	// Iterate over the Hashtable and print each key-value pair using method chaining
+	// Iterate over the Map and print each key-value pair using method chaining
 	animals.Each(func(key string, value Animal) {
 		fmt.Println("Key:", key, "Value:", value)
 	})
@@ -741,13 +741,13 @@ A [Dockerfile](./Dockerfile) is provided for individuals that prefer containeriz
 ### Building
 Building the Docker container:
 ```sh
-docker build . -t hashtable
+docker build . -t gomap
 ```
 
 ### Running
 Developing and running Go within the Docker container:
 ```sh
-docker run -it --rm --name hashtable hashtable
+docker run -it --rm --name gomap gomap
 ```
 
 ## Docker Compose
@@ -759,13 +759,13 @@ docker-compose up -d
 ```
 
 ## Contributing
-We warmly welcome contributions to Hashtable. Whether you have innovative ideas, bug reports, or enhancements in mind, please share them with us by submitting GitHub issues or creating pull requests. For substantial contributions, it's a good practice to start a discussion by creating an issue to ensure alignment with the project's goals and direction. Refer to the [CONTRIBUTING](./CONTRIBUTING.md) file for comprehensive details.
+We warmly welcome contributions to Map. Whether you have innovative ideas, bug reports, or enhancements in mind, please share them with us by submitting GitHub issues or creating pull requests. For substantial contributions, it's a good practice to start a discussion by creating an issue to ensure alignment with the project's goals and direction. Refer to the [CONTRIBUTING](./CONTRIBUTING.md) file for comprehensive details.
 
 ## Branching
 For a smooth collaboration experience, we have established branch naming conventions and guidelines. Please consult the [BRANCH_NAMING_CONVENTION](./BRANCH_NAMING_CONVENTION.md) document for comprehensive information and best practices.
 
 ## License
-Hashtable is released under the MIT License, granting you the freedom to use, modify, and distribute the code within this repository in accordance with the terms of the license. For additional information, please review the [LICENSE](./LICENSE) file.
+Map is released under the MIT License, granting you the freedom to use, modify, and distribute the code within this repository in accordance with the terms of the license. For additional information, please review the [LICENSE](./LICENSE) file.
 
 ## Security
 If you discover a security vulnerability within this project, please consult the [SECURITY](./SECURITY.md) document for information and next steps.
