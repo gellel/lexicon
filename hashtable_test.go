@@ -1254,6 +1254,49 @@ func TestMergeMany(t *testing.T) {
 	}
 }
 
+// TestMergeManyFunc tests Hashtable.MergeManyFunc.
+func TestMergeManyFunc(t *testing.T) {
+	// Test case: Merge key-value pairs based on a condition function.
+	ht1 := &hashtable.Hashtable[string, int]{} // Create an empty destination hashtable.
+	ht2 := &hashtable.Hashtable[string, int]{} // Create the first source hashtable.
+	ht2.Add("apple", 5)
+	ht3 := &hashtable.Hashtable[string, int]{} // Create the second source hashtable.
+	ht3.Add("orange", 10)
+	ht4 := &hashtable.Hashtable[string, int]{} // Create the third source hashtable.
+	ht4.Add("banana", 7)
+
+	// Condition function to include pairs only if the value is greater than 7.
+	conditionFunc := func(i int, key string, value int) bool {
+		return value >= 7
+	}
+
+	// Merge key-value pairs based on the condition function.
+	mergedHashtable := ht1.MergeManyFunc([]*hashtable.Hashtable[string, int]{ht2, ht3, ht4}, conditionFunc)
+
+	// Verify that the merged hashtable contains the expected key-value pairs.
+	expectedPairs := map[string]int{
+		"orange": 10,
+		"banana": 7,
+	}
+	for key, expectedValue := range expectedPairs {
+		value, ok := mergedHashtable.Get(key)
+		if !ok || value != expectedValue {
+			t.Errorf("Expected merged hashtable to contain key '%s': %d, but it contains '%d'", key, expectedValue, value)
+		}
+	}
+
+	// Verify that unwanted pairs are not present in the merged hashtable.
+	unwantedPairs := map[string]int{
+		"apple": 5,
+	}
+	for key := range unwantedPairs {
+		_, ok := mergedHashtable.Get(key)
+		if ok {
+			t.Errorf("Expected merged hashtable not to contain key '%s', but it was found", key)
+		}
+	}
+}
+
 // TestNot tests Hashtable.Not.
 func TestNot(t *testing.T) {
 	// Test case 1: Check if a key is not present in an empty hashtable.
