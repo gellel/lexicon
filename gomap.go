@@ -98,6 +98,42 @@ func (gomap *Map[K, V]) AddManyOK(values ...map[K]V) *slice.Slice[bool] {
 	return &successfulInsertions
 }
 
+// AddValueFunc adds a key-value pair to the map using a function to determine the key from the given value.
+// It takes a value and a key calculation function as input. The function calculates the key based on the provided value
+// and adds the key-value pair to the map.
+//
+//	// Create a new Map instance.
+//	newMap := make(gomap.Map[string, int])
+//
+//	// Function to calculate key from value (for example, using string conversion)
+//	gomap.AddValueFunc(5, func(value int) string {
+//		return strconv.Itoa(value)
+//	})  // Adds key "5" with value 5 to the map
+func (gomap *Map[K, V]) AddValueFunc(value V, fn func(value V) K) *Map[K, V] {
+	return gomap.Add(fn(value), value)
+}
+
+// AddValuesFunc adds multiple key-value pairs to the map using a function to determine keys from the given values.
+// It takes a slice of values and a key calculation function as input. The function calculates the key for each value
+// based on its index and the provided value, and adds the corresponding key-value pairs to the map.
+//
+//	// Create a new Map instance.
+//	newMap := make(gomap.Map[string, int])
+//
+//	values := []int{5, 10, 15}
+//	// Function to calculate key from value and index (for example, using string conversion and appending index)
+//	gomap.AddValuesFunc(values, func(i int, value int) string {
+//		return strconv.Itoa(value) + strconv.Itoa(i)
+//	})  // Adds key "50", "101" and "152" with values 5, 10, and 15 to the map
+func (gomap *Map[K, V]) AddValuesFunc(values []V, fn func(i int, value V) K) *Map[K, V] {
+	for i, value := range values {
+		gomap.AddValueFunc(value, func(value V) K {
+			return fn(i, value)
+		})
+	}
+	return gomap
+}
+
 // AddOK inserts a new key-value pair into the map only if the key does not already exist in the map.
 // If the key already exists, the insertion fails, and false is returned. If the key is new, a new key-value pair is added to the gomap,
 // and true is returned to indicate a successful insertion.
