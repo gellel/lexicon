@@ -4,6 +4,7 @@ import (
 	"math"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -268,6 +269,57 @@ func TestAddOK(t *testing.T) {
 	value, exists = newMap["banana"]
 	if !exists || value != 3 {
 		t.Fatalf("Expected key 'banana' with value '3', but got value '%d'", value)
+	}
+}
+
+// TestAddValueFunc tests Map.AddValueFunc.
+func TestAddValueFunc(t *testing.T) {
+	// Create a new Map instance.
+	newMap := &gomap.Map[string, int]{} // Change the data types accordingly.
+
+	// Function to calculate key from value using string conversion.
+	keyCalculationFunc := func(value int) string {
+		return strconv.Itoa(value)
+	}
+
+	// Test case: Add a key-value pair using AddValueFunc.
+	valueToAdd := 5
+	newMap.AddValueFunc(valueToAdd, keyCalculationFunc)
+
+	// Verify that the key-value pair is added correctly.
+	expectedKey := "5"
+	expectedValue := 5
+	retrievedValue, ok := newMap.Get(expectedKey)
+
+	if !ok || retrievedValue != expectedValue {
+		t.Errorf("Expected key '%s' with value %d, but got key '%s' with value %d", expectedKey, expectedValue, expectedKey, retrievedValue)
+	}
+}
+
+// TestAddValuesFunc tests the AddValuesFunc method of the Map.
+func TestAddValuesFunc(t *testing.T) {
+	// Test case 1: Adding multiple key-value pairs to the map using a slice of values and a key calculation function.
+	newMap := &gomap.Map[string, int]{} // Create an empty map.
+	values := []int{5, 10, 15}
+	keyCalculationFunc := func(i int, value int) string {
+		return strconv.Itoa(value) + strconv.Itoa(i)
+	}
+	newMap.AddValuesFunc(values, keyCalculationFunc) // Adds keys "50", "101", and "152" with values 5, 10, and 15 to the map.
+
+	// Verify that the key-value pairs have been added correctly.
+	expectedKeyValues := map[string]int{
+		"50":  5,
+		"101": 10,
+		"152": 15,
+	}
+
+	for key, expectedValue := range expectedKeyValues {
+		actualValue, ok := newMap.Get(key)
+		if !ok {
+			t.Errorf("Expected key '%s' to be in the map, but it was not found.", key)
+		} else if actualValue != expectedValue {
+			t.Errorf("Expected value %d for key '%s', but got %d", expectedValue, key, actualValue)
+		}
 	}
 }
 

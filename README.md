@@ -113,6 +113,28 @@ added := myMap.AddOK("key1", 1)
 fmt.Println(added) // true
 ```
 
+### AddValueFunc
+Adds a key-value pair to the map using a function to determine the key from the given value.
+
+```Go
+myMap := &gomap.Map[string, int]{}
+myMap.AddValueFunc(5, func(value int) string {
+	return strconv.Itoa(value)
+})
+fmt.Println(myMap) // &map[5:5]
+```
+
+### AddValuesFunc
+Adds multiple key-value pairs to the map using a function to determine keys from the given values.
+
+```Go
+myMap := &gomap.Map[string, int]{}
+myMap.AddValuesFunc([]int{5, 10, 15}, func(i int, value int) string {
+	return strconv.Itoa(value) + strconv.Itoa(i)
+})
+fmt.Println(myMap) // &map[50:5 101:10 152:15]
+```
+
 ### Contains
 Checks if the given value is present in the hash table and returns the corresponding key along with a boolean indicating existence.
 
